@@ -58,7 +58,7 @@ export function TourSort({ sort, onSort, sortOptions }: Props) {
         }
         sx={{ fontWeight: 'fontWeightSemiBold' }}
       >
-        Sort by:
+        Ordenar por:
         <Box
           component="span"
           sx={{ ml: 0.5, fontWeight: 'fontWeightBold', textTransform: 'capitalize' }}

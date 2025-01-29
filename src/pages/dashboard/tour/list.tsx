@@ -6,7 +6,7 @@ import { TourListView } from 'src/sections/tour/view';
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `Tour list | Dashboard - ${CONFIG.appName}` };
+const metadata = { title: `Actividades | Dashboard - ${CONFIG.appName}` };
 
 export default function Page() {
   return (

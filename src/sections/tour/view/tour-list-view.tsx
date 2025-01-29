@@ -1,7 +1,8 @@
+import type { IActividad } from 'src/types/actividad';
 import type { ITourItem, ITourFilters } from 'src/types/tour';
 
 import { orderBy } from 'es-toolkit';
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useBoolean, useSetState } from 'minimal-shared/hooks';
 
 import Box from '@mui/material/Box';
@@ -13,8 +14,8 @@ import { RouterLink } from 'src/routes/components';
 
 import { fIsAfter, fIsBetween } from 'src/utils/format-time';
 
+import { _tours } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { _tours, _tourGuides, TOUR_SORT_OPTIONS, TOUR_SERVICE_OPTIONS } from 'src/_mock';
 
 import { Iconify } from 'src/components/iconify';
 import { EmptyContent } from 'src/components/empty-content';
@@ -32,6 +33,25 @@ export function TourListView() {
   const openFilters = useBoolean();
 
   const [sortBy, setSortBy] = useState('latest');
+  const [actividades, setActividades] = useState<IActividad[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchTours = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/actividades');
+      const data = await response.json();
+      console.log(JSON.stringify(data));
+      setActividades(data.items);
+    } catch (error) {
+      console.error('Error fetching actividades:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTours();
+  }, []);
 
   const filters = useSetState<ITourFilters>({
     destination: [],
@@ -84,12 +104,12 @@ export function TourListView() {
           onOpen={openFilters.onTrue}
           onClose={openFilters.onFalse}
           options={{
-            tourGuides: _tourGuides,
-            services: TOUR_SERVICE_OPTIONS.map((option) => option.label),
+            tourGuides: [],
+            services: [],
           }}
         />
 
-        <TourSort sort={sortBy} onSort={handleSortBy} sortOptions={TOUR_SORT_OPTIONS} />
+        <TourSort sort={sortBy} onSort={handleSortBy} sortOptions={[]} />
       </Box>
     </Box>
   );
@@ -101,11 +121,11 @@ export function TourListView() {
   return (
     <DashboardContent>
       <CustomBreadcrumbs
-        heading="List"
+        heading="Lista de Actividades"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
-          { name: 'Tour', href: paths.dashboard.tour.root },
-          { name: 'List' },
+          { name: 'Actividades', href: paths.dashboard.tour.root },
+          { name: 'Lista' },
         ]}
         action={
           <Button
@@ -114,7 +134,7 @@ export function TourListView() {
             variant="contained"
             startIcon={<Iconify icon="mingcute:add-line" />}
           >
-            New Tour
+            Nueva Actividad
           </Button>
         }
         sx={{ mb: { xs: 3, md: 5 } }}
@@ -125,9 +145,13 @@ export function TourListView() {
         {canReset && renderResults()}
       </Stack>
 
-      {notFound && <EmptyContent filled sx={{ py: 10 }} />}
-
-      <TourList tours={dataFiltered} />
+      {loading ? (
+        <EmptyContent filled sx={{ py: 10 }} />
+      ) : notFound ? (
+        <EmptyContent filled sx={{ py: 10 }} />
+      ) : (
+        <TourList actividades={actividades} />
+      )}
     </DashboardContent>
   );
 }

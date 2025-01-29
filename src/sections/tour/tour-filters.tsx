@@ -102,7 +102,7 @@ export function TourFilters({
         }}
       >
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
-          Filters
+          Filtros
         </Typography>
 
         <Tooltip title="Reset">
@@ -248,7 +248,7 @@ export function TourFilters({
         }
         onClick={onOpen}
       >
-        Filters
+        Filtros
       </Button>
 
       <Drawer
