@@ -7,7 +7,7 @@ import { AccountNotificationsView } from 'src/sections/account/view';
 // ----------------------------------------------------------------------
 
 const metadata = {
-  title: `Account notifications settings | Dashboard - ${CONFIG.appName}`,
+  title: `Account notifications settings | ${CONFIG.appName}`,
 };
 
 export default function Page() {

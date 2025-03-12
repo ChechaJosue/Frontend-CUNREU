@@ -6,7 +6,7 @@ import { ProductCreateView } from 'src/sections/product/view';
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `Create a new product | Dashboard - ${CONFIG.appName}` };
+const metadata = { title: `Create a new product | ${CONFIG.appName}` };
 
 export default function Page() {
   return (

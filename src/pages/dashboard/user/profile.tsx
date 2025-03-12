@@ -6,7 +6,7 @@ import { UserProfileView } from 'src/sections/user/view';
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `User profile | Dashboard - ${CONFIG.appName}` };
+const metadata = { title: `User profile | ${CONFIG.appName}` };
 
 export default function Page() {
   return (

@@ -7,4 +7,5 @@ export type IActividad = {
   dpi: string;
   estado: number;
   asistencia: number;
+  costo: number;
 };

@@ -65,10 +65,10 @@ export const FieldsSchema = zod
     }),
     // country
     singleCountry: zod.string().min(1, { message: 'Single country is required!' }),
-    multiCountry: zod.string().array().min(2, { message: 'Must have at least 2 items!' }),
+    multiCountry: zod.string().array().min(2, { message: 'Must have at least 2 items! C' }),
     // select
     singleSelect: zod.string().min(1, { message: 'Single select is required!' }),
-    multiSelect: zod.string().array().min(2, { message: 'Must have at least 2 items!' }),
+    multiSelect: zod.string().array().min(2, { message: 'Must have at least 2 items! D' }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Passwords do not match!',

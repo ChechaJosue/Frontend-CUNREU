@@ -6,7 +6,7 @@ import { KanbanView } from 'src/sections/kanban/view';
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `Kanban | Dashboard - ${CONFIG.appName}` };
+const metadata = { title: `Kanban | ${CONFIG.appName}` };
 
 export default function Page() {
   return (

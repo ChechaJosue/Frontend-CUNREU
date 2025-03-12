@@ -68,6 +68,11 @@ const TourDetailsPage = lazy(() => import('src/pages/dashboard/tour/details'));
 const TourListPage = lazy(() => import('src/pages/dashboard/tour/list'));
 const TourCreatePage = lazy(() => import('src/pages/dashboard/tour/new'));
 const TourEditPage = lazy(() => import('src/pages/dashboard/tour/edit'));
+// Actividades
+const DetalleActividadPage = lazy(() => import('src/pages/dashboard/actividades/detalle'));
+const ListaActividadesPage = lazy(() => import('src/pages/dashboard/actividades/lista'));
+const CrearActividadPage = lazy(() => import('src/pages/dashboard/actividades/crear'));
+const EditarActividadPage = lazy(() => import('src/pages/dashboard/actividades/editar'));
 // File manager
 const FileManagerPage = lazy(() => import('src/pages/dashboard/file-manager'));
 // App
@@ -194,6 +199,16 @@ export const dashboardRoutes: RouteObject[] = [
           { path: ':id', element: <TourDetailsPage /> },
           { path: 'new', element: <TourCreatePage /> },
           { path: ':id/edit', element: <TourEditPage /> },
+        ],
+      },
+      {
+        path: 'actividades',
+        children: [
+          { index: true, element: <ListaActividadesPage /> },
+          { path: 'lista', element: <ListaActividadesPage /> },
+          { path: ':id', element: <DetalleActividadPage /> },
+          { path: 'crear', element: <CrearActividadPage /> },
+          { path: ':id/editar', element: <EditarActividadPage /> },
         ],
       },
       { path: 'file-manager', element: <FileManagerPage /> },

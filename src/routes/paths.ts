@@ -179,5 +179,17 @@ export const paths = {
         edit: `${ROOTS.DASHBOARD}/tour/${MOCK_ID}/edit`,
       },
     },
+    actividades: {
+      root: `${ROOTS.DASHBOARD}/actividades`,
+      new: `${ROOTS.DASHBOARD}/actividades/crear`,
+      details: (id: string) => `${ROOTS.DASHBOARD}/actividades/${id}`,
+      edit: (id: string) => `${ROOTS.DASHBOARD}/actividades/${id}/editar`,
+    },
+    usuarios: {
+      root: `${ROOTS.DASHBOARD}/usuarios`,
+      new: `${ROOTS.DASHBOARD}/usuarios/crear`,
+      details: (id: string) => `${ROOTS.DASHBOARD}/usuarios/${id}`,
+      edit: (id: string) => `${ROOTS.DASHBOARD}/usuarios/${id}/editar`,
+    },
   },
 };

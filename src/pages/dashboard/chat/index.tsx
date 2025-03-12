@@ -6,7 +6,7 @@ import { ChatView } from 'src/sections/chat/view';
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `Chat | Dashboard - ${CONFIG.appName}` };
+const metadata = { title: `Chat | ${CONFIG.appName}` };
 
 export default function Page() {
   return (

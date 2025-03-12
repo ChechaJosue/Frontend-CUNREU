@@ -6,7 +6,7 @@ import { PostCreateView } from 'src/sections/blog/view';
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `Create a new post | Dashboard - ${CONFIG.appName}` };
+const metadata = { title: `Create a new post | ${CONFIG.appName}` };
 
 export default function Page() {
   return (

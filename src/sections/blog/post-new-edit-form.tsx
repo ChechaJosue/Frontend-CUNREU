@@ -40,7 +40,7 @@ export const NewPostSchema = zod.object({
     .min(100, { message: 'Content must be at least 100 characters' })
     .max(500, { message: 'Content must be less than 500 characters' }),
   coverUrl: schemaHelper.file({ message: 'Cover is required!' }),
-  tags: zod.string().array().min(2, { message: 'Must have at least 2 items!' }),
+  tags: zod.string().array().min(2, { message: 'Must have at least 2 items! Q' }),
   metaKeywords: zod.string().array().min(1, { message: 'Meta keywords is required!' }),
   // Not required
   metaTitle: zod.string(),

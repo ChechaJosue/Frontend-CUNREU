@@ -6,7 +6,7 @@ import { AccountSocialsView } from 'src/sections/account/view';
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `Account socials settings | Dashboard - ${CONFIG.appName}` };
+const metadata = { title: `Account socials settings | ${CONFIG.appName}` };
 
 export default function Page() {
   return (

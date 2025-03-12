@@ -1,7 +1,7 @@
 // ----------------------------------------------------------------------
 
-export const fallbackLng = 'en';
-export const languages = ['en', 'fr', 'vi', 'cn', 'ar'];
+export const fallbackLng = 'es';
+export const languages = ['es'];
 export const defaultNS = 'common';
 
 export type LanguageValue = (typeof languages)[number];
@@ -31,10 +31,10 @@ export const changeLangMessages: Record<
     error: 'Error changing language!',
     loading: 'Loading...',
   },
-  vi: {
-    success: 'Ngôn ngữ đã được thay đổi!',
-    error: 'Lỗi khi thay đổi ngôn ngữ!',
-    loading: 'Đang tải...',
+  es: {
+    success: 'Lenguaje cambiado',
+    error: 'Error cambiando el lenguaje',
+    loading: 'Cargando...',
   },
   fr: {
     success: 'La langue a été changée!',

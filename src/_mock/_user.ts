@@ -3,10 +3,10 @@ import { _mock } from './_mock';
 // ----------------------------------------------------------------------
 
 export const USER_STATUS_OPTIONS = [
-  { value: 'active', label: 'Active' },
+  { value: 'active', label: 'Activo' },
   { value: 'pending', label: 'Pending' },
   { value: 'banned', label: 'Banned' },
-  { value: 'rejected', label: 'Rejected' },
+  { value: 'rejected', label: 'Inactivo' },
 ];
 
 export const _userAbout = {
@@ -138,6 +138,16 @@ export const _userList = Array.from({ length: 20 }, (_, index) => ({
   country: _mock.countryNames(index),
   avatarUrl: _mock.image.avatar(index),
   phoneNumber: _mock.phoneNumber(index),
+  status:
+    (index % 2 && 'pending') || (index % 3 && 'banned') || (index % 4 && 'rejected') || 'active',
+}));
+
+export const _listaUsuarios = Array.from({ length: 20 }, (_, index) => ({
+  id: _mock.id(index),
+  rol: _mock.role(index),
+  email: _mock.email(index),
+  nombres: _mock.firstName(index),
+  apellidos: _mock.lastName(index),
   status:
     (index % 2 && 'pending') || (index % 3 && 'banned') || (index % 4 && 'rejected') || 'active',
 }));

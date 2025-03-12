@@ -9,7 +9,7 @@ import { TourEditView } from 'src/sections/tour/view';
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `Tour edit | Dashboard - ${CONFIG.appName}` };
+const metadata = { title: `Tour edit | ${CONFIG.appName}` };
 
 export default function Page() {
   const { id = '' } = useParams();

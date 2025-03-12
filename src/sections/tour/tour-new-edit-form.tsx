@@ -61,8 +61,8 @@ export const NewTourSchema = zod
         message: 'Destination is required!',
       }
     ),
-    services: zod.string().array().min(2, { message: 'Must have at least 2 items!' }),
-    tags: zod.string().array().min(2, { message: 'Must have at least 2 items!' }),
+    services: zod.string().array().min(2, { message: 'Must have at least 2 items! M' }),
+    tags: zod.string().array().min(2, { message: 'Must have at least 2 items! N' }),
   })
   .refine((data) => !fIsAfter(data.available.startDate, data.available.endDate), {
     message: 'End date cannot be earlier than start date!',

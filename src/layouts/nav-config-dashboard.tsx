@@ -50,7 +50,7 @@ export const navData: NavSectionProps['data'] = [
    * Overview
    */
   {
-    subheader: 'Overview',
+    subheader: 'Analíticas',
     items: [
       { title: 'App', path: paths.dashboard.root, icon: ICONS.dashboard },
       { title: 'Ecommerce', path: paths.dashboard.general.ecommerce, icon: ICONS.ecommerce },
@@ -65,19 +65,28 @@ export const navData: NavSectionProps['data'] = [
    * Management
    */
   {
-    subheader: 'Management',
+    subheader: 'Administración',
     items: [
       {
-        title: 'User',
+        title: 'Usuarios',
         path: paths.dashboard.user.root,
         icon: ICONS.user,
         children: [
-          { title: 'Profile', path: paths.dashboard.user.root },
-          { title: 'Cards', path: paths.dashboard.user.cards },
-          { title: 'List', path: paths.dashboard.user.list },
-          { title: 'Create', path: paths.dashboard.user.new },
-          { title: 'Edit', path: paths.dashboard.user.demo.edit },
-          { title: 'Account', path: paths.dashboard.user.account },
+          // { title: 'Profile', path: paths.dashboard.user.root },
+          // { title: 'Cards', path: paths.dashboard.user.cards },
+          { title: 'Lista', path: paths.dashboard.user.list },
+          { title: 'Crear', path: paths.dashboard.user.new },
+          { title: 'Editar', path: paths.dashboard.user.demo.edit },
+          { title: 'Mi cuenta', path: paths.dashboard.user.account },
+        ],
+      },
+      {
+        title: 'Actividades',
+        path: paths.dashboard.actividades.root,
+        icon: ICONS.course,
+        children: [
+          { title: 'Lista', path: paths.dashboard.actividades.root },
+          { title: 'Crear', path: paths.dashboard.actividades.new },
         ],
       },
       {
@@ -134,7 +143,7 @@ export const navData: NavSectionProps['data'] = [
         ],
       },
       {
-        title: 'Actividades',
+        title: 'Tours',
         path: paths.dashboard.tour.root,
         icon: ICONS.tour,
         children: [

@@ -126,12 +126,12 @@ export const schemaHelper = {
       if (!data.length) {
         ctx.addIssue({
           code: zod.ZodIssueCode.custom,
-          message: props?.message ?? 'Files is required!',
+          message: props?.message ?? 'El archivo es requerido',
         });
       } else if (data.length < minFiles) {
         ctx.addIssue({
           code: zod.ZodIssueCode.custom,
-          message: `Must have at least ${minFiles} items!`,
+          message: `Debe tener al menos ${minFiles} archivos`,
         });
       }
 

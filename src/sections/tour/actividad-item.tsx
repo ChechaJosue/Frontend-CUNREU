@@ -4,16 +4,14 @@ import type { IActividad } from 'src/types/actividad';
 import { usePopover } from 'minimal-shared/hooks';
 
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
 import Card from '@mui/material/Card';
+import { Typography } from '@mui/material';
 import MenuList from '@mui/material/MenuList';
 import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
 import ListItemText from '@mui/material/ListItemText';
 
 import { RouterLink } from 'src/routes/components';
-
-import { fDateTime } from 'src/utils/format-time';
 
 import { TRAVEL_IMAGES } from 'src/_mock';
 
@@ -84,7 +82,7 @@ export function ActividadItem({ actividad, editHref, detailsHref, onDelete, sx, 
         {/* {renderRating()} */}
         <Image
           alt={TRAVEL_IMAGES[0]}
-          src={TRAVEL_IMAGES[0]}
+          src="/assets/images/mock/travel/CUNREU-IMAGEN.jpg"
           sx={{ width: 1, height: 164, borderRadius: 1 }}
         />
       </Box>
@@ -109,24 +107,54 @@ export function ActividadItem({ actividad, editHref, detailsHref, onDelete, sx, 
   const renderTexts = () => (
     <ListItemText
       sx={[(theme) => ({ p: theme.spacing(2.5, 2.5, 2, 2.5) })]}
-      primary={`Posted date: ${fDateTime(actividad.fechaInicio)}`}
-      secondary={
-        <Link component={RouterLink} href={detailsHref} color="inherit">
+      primary={
+        <Typography
+          variant="subtitle1"
+          sx={{
+            whiteSpace: 'normal',
+            wordBreak: 'break-word',
+            overflow: 'visible',
+          }}
+        >
           {actividad.descripcion}
-        </Link>
+        </Typography>
       }
       slotProps={{
         primary: {
-          sx: { typography: 'caption', color: 'text.disabled' },
-        },
-        secondary: {
-          noWrap: true,
-          component: 'h6',
-          sx: { mt: 1, color: 'text.primary', typography: 'subtitle1' },
+          component: 'div',
+          sx: {
+            color: 'text.primary',
+            typography: 'subtitle1',
+            wordBreak: 'break-word',
+            whiteSpace: 'normal',
+          },
         },
       }}
     />
   );
+  // const renderTexts = () => (
+  //   <ListItemText
+  //     sx={[(theme) => ({ p: theme.spacing(2.5, 2.5, 2, 2.5) })]}
+  //     primary={`Posted date: ${fDateTime(actividad.fechaInicio)}`}
+  //     secondary={
+  //       <Tooltip title={actividad.descripcion} placement="top">
+  //         <Typography noWrap variant="subtitle1">
+  //           {actividad.descripcion}
+  //         </Typography>
+  //       </Tooltip>
+  //     }
+  //     slotProps={{
+  //       primary: {
+  //         sx: { typography: 'caption', color: 'text.disabled' },
+  //       },
+  //       secondary: {
+  //         noWrap: true,
+  //         component: 'h6',
+  //         sx: { mt: 1, color: 'text.primary', typography: 'subtitle1' },
+  //       },
+  //     }}
+  //   />
+  // );
 
   const renderInfo = () => (
     <Box

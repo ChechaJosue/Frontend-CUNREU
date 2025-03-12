@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'src/components/snackbar';
 
 import { allLangs } from './all-langs';
-import { fallbackLng, changeLangMessages as messages } from './locales-config';
+import { changeLangMessages as messages } from './locales-config';
 
 import type { LanguageValue } from './locales-config';
 
@@ -14,7 +14,7 @@ import type { LanguageValue } from './locales-config';
 export function useTranslate(ns?: string) {
   const { t, i18n } = useTranslation(ns);
 
-  const fallback = allLangs.filter((lang) => lang.value === fallbackLng)[0];
+  const fallback = allLangs[0];
 
   const currentLang = allLangs.find((lang) => lang.value === i18n.resolvedLanguage);
 

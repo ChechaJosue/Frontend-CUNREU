@@ -53,7 +53,7 @@ export const NewProductSchema = zod.object({
   ),
   colors: zod.string().array().min(1, { message: 'Choose at least one option!' }),
   sizes: zod.string().array().min(1, { message: 'Choose at least one option!' }),
-  tags: zod.string().array().min(2, { message: 'Must have at least 2 items!' }),
+  tags: zod.string().array().min(2, { message: 'Must have at least 2 items! K' }),
   gender: zod.array(zod.string()).min(1, { message: 'Choose at least one option!' }),
   price: schemaHelper.nullableInput(
     zod.number({ coerce: true }).min(1, { message: 'Price is required!' }),
