@@ -1,4 +1,4 @@
-import type { IUserTableFilters } from 'src/types/user';
+import type { IUsuarioTableFilters } from 'src/types/user';
 import type { UseSetStateReturn } from 'minimal-shared/hooks';
 import type { FiltersResultProps } from 'src/components/filters-result';
 
@@ -12,7 +12,7 @@ import { chipProps, FiltersBlock, FiltersResult } from 'src/components/filters-r
 
 type Props = FiltersResultProps & {
   onResetPage: () => void;
-  filters: UseSetStateReturn<IUserTableFilters>;
+  filters: UseSetStateReturn<IUsuarioTableFilters>;
 };
 
 export function UserTableFiltersResult({ filters, onResetPage, totalResults, sx }: Props) {
@@ -20,22 +20,22 @@ export function UserTableFiltersResult({ filters, onResetPage, totalResults, sx 
 
   const handleRemoveKeyword = useCallback(() => {
     onResetPage();
-    updateFilters({ name: '' });
+    updateFilters({ nombres: '' });
   }, [onResetPage, updateFilters]);
 
   const handleRemoveStatus = useCallback(() => {
     onResetPage();
-    updateFilters({ status: 'all' });
+    updateFilters({ estado: 'all' });
   }, [onResetPage, updateFilters]);
 
   const handleRemoveRole = useCallback(
     (inputValue: string) => {
-      const newValue = currentFilters.role.filter((item) => item !== inputValue);
+      const newValue = currentFilters.rol.filter((item) => item !== inputValue);
 
       onResetPage();
-      updateFilters({ role: newValue });
+      updateFilters({ rol: newValue });
     },
-    [onResetPage, updateFilters, currentFilters.role]
+    [onResetPage, updateFilters, currentFilters.rol]
   );
 
   const handleReset = useCallback(() => {
@@ -45,23 +45,23 @@ export function UserTableFiltersResult({ filters, onResetPage, totalResults, sx 
 
   return (
     <FiltersResult totalResults={totalResults} onReset={handleReset} sx={sx}>
-      <FiltersBlock label="Status:" isShow={currentFilters.status !== 'all'}>
+      <FiltersBlock label="Status:" isShow={currentFilters.estado !== 'all'}>
         <Chip
           {...chipProps}
-          label={currentFilters.status}
+          label={currentFilters.estado}
           onDelete={handleRemoveStatus}
           sx={{ textTransform: 'capitalize' }}
         />
       </FiltersBlock>
 
-      <FiltersBlock label="Role:" isShow={!!currentFilters.role.length}>
-        {currentFilters.role.map((item) => (
+      <FiltersBlock label="Role:" isShow={!!currentFilters.rol.length}>
+        {currentFilters.rol.map((item) => (
           <Chip {...chipProps} key={item} label={item} onDelete={() => handleRemoveRole(item)} />
         ))}
       </FiltersBlock>
 
-      <FiltersBlock label="Keyword:" isShow={!!currentFilters.name}>
-        <Chip {...chipProps} label={currentFilters.name} onDelete={handleRemoveKeyword} />
+      <FiltersBlock label="Keyword:" isShow={!!currentFilters.nombres}>
+        <Chip {...chipProps} label={currentFilters.nombres} onDelete={handleRemoveKeyword} />
       </FiltersBlock>
     </FiltersResult>
   );

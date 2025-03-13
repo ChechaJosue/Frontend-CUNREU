@@ -74,6 +74,40 @@ export type IUserCard = {
   totalFollowing: number;
 };
 
+// export interface IUsuario {
+//   id: string;
+//   nombres: string;
+//   apellidos: string;
+//   email: string;
+//   rol: string;
+//   estado: 'activo' | 'inactivo';
+// }
+export interface IUsuario {
+  id: string;
+  nombres: string;
+  apellidos: string;
+  direccion?: string;
+  telefono: string;
+  email: string;
+  idTipoDocumentoIdentificacion?: number;
+  documentoIdentificacion: string;
+  imagen: string | File | null;
+  fechaNacimiento: string;
+  colegiado?: string;
+  idProfesion?: number;
+  idRol?: number;
+  idMunicipio: number;
+  estado: 'activo' | 'inactivo';
+  rol: string;
+}
+
+export interface IUsuarioTableFilters {
+  nombres: string;
+  apellidos: string;
+  rol: string[];
+  estado: string;
+}
+
 export type IUserItem = {
   id: string;
   name: string;

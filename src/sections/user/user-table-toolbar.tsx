@@ -1,4 +1,4 @@
-import type { IUserTableFilters } from 'src/types/user';
+import type { IUsuarioTableFilters } from 'src/types/user';
 import type { SelectChangeEvent } from '@mui/material/Select';
 import type { UseSetStateReturn } from 'minimal-shared/hooks';
 
@@ -24,7 +24,7 @@ import { CustomPopover } from 'src/components/custom-popover';
 
 type Props = {
   onResetPage: () => void;
-  filters: UseSetStateReturn<IUserTableFilters>;
+  filters: UseSetStateReturn<IUsuarioTableFilters>;
   options: {
     roles: string[];
   };
@@ -38,7 +38,7 @@ export function UserTableToolbar({ filters, options, onResetPage }: Props) {
   const handleFilterName = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       onResetPage();
-      updateFilters({ name: event.target.value });
+      updateFilters({ nombres: event.target.value });
     },
     [onResetPage, updateFilters]
   );
@@ -49,7 +49,7 @@ export function UserTableToolbar({ filters, options, onResetPage }: Props) {
         typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value;
 
       onResetPage();
-      updateFilters({ role: newValue });
+      updateFilters({ rol: newValue });
     },
     [onResetPage, updateFilters]
   );
@@ -93,12 +93,12 @@ export function UserTableToolbar({ filters, options, onResetPage }: Props) {
         }}
       >
         <FormControl sx={{ flexShrink: 0, width: { xs: 1, md: 200 } }}>
-          <InputLabel htmlFor="filter-role-select">Role</InputLabel>
+          <InputLabel htmlFor="filter-role-select">Rol</InputLabel>
           <Select
             multiple
-            value={currentFilters.role}
+            value={currentFilters.rol}
             onChange={handleFilterRole}
-            input={<OutlinedInput label="Role" />}
+            input={<OutlinedInput label="Rol" />}
             renderValue={(selected) => selected.map((value) => value).join(', ')}
             inputProps={{ id: 'filter-role-select' }}
             MenuProps={{ PaperProps: { sx: { maxHeight: 240 } } }}
@@ -108,7 +108,7 @@ export function UserTableToolbar({ filters, options, onResetPage }: Props) {
                 <Checkbox
                   disableRipple
                   size="small"
-                  checked={currentFilters.role.includes(option)}
+                  checked={currentFilters.rol.includes(option)}
                 />
                 {option}
               </MenuItem>
@@ -127,9 +127,9 @@ export function UserTableToolbar({ filters, options, onResetPage }: Props) {
         >
           <TextField
             fullWidth
-            value={currentFilters.name}
+            value={currentFilters.nombres}
             onChange={handleFilterName}
-            placeholder="Search..."
+            placeholder="Buscar..."
             slotProps={{
               input: {
                 startAdornment: (

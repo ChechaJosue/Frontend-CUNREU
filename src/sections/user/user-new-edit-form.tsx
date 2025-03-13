@@ -1,8 +1,6 @@
-import type { IUserItem } from 'src/types/user';
-
 import { z as zod } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { isValidPhoneNumber } from 'react-phone-number-input/input';
 
 import Box from '@mui/material/Box';
@@ -29,58 +27,127 @@ import { Form, Field, schemaHelper } from 'src/components/hook-form';
 export type NewUserSchemaType = zod.infer<typeof NewUserSchema>;
 
 export const NewUserSchema = zod.object({
-  avatarUrl: schemaHelper.file({ message: 'Avatar is required!' }),
-  name: zod.string().min(1, { message: 'Name is required!' }),
+  nombres: zod.string().min(1, { message: '¡Nombres son requeridos!' }),
+  apellidos: zod.string().min(1, { message: '¡Apellidos son requeridos!' }),
+  direccion: zod.string().optional(),
+  telefono: schemaHelper.phoneNumber({ isValid: isValidPhoneNumber }),
   email: zod
     .string()
-    .min(1, { message: 'Email is required!' })
-    .email({ message: 'Email must be a valid email address!' }),
-  phoneNumber: schemaHelper.phoneNumber({ isValid: isValidPhoneNumber }),
-  country: schemaHelper.nullableInput(zod.string().min(1, { message: 'Country is required!' }), {
-    // message for null value
-    message: 'Country is required!',
-  }),
-  address: zod.string().min(1, { message: 'Address is required!' }),
-  company: zod.string().min(1, { message: 'Company is required!' }),
-  state: zod.string().min(1, { message: 'State is required!' }),
-  city: zod.string().min(1, { message: 'City is required!' }),
-  role: zod.string().min(1, { message: 'Role is required!' }),
-  zipCode: zod.string().min(1, { message: 'Zip code is required!' }),
-  // Not required
-  status: zod.string(),
-  isVerified: zod.boolean(),
+    .min(1, { message: '¡Email es requerido!' })
+    .email({ message: '¡Email debe ser una dirección válida!' }),
+  idTipoDocumentoIdentificacion: zod.number(),
+  documentoIdentificacion: zod
+    .string()
+    .min(1, { message: '¡Documento de identificación es requerido!' }),
+  // imagen: schemaHelper.file({ message: '¡Imagen es requerida!' }),
+  fechaNacimiento: zod.string().min(1, { message: '¡Fecha de nacimiento es requerida!' }),
+  colegiado: zod.string().optional(),
+  idProfesion: zod.number().optional(),
+  idRol: zod.number(),
+  idDepartamento: zod.number().min(1, { message: '¡Departamento es requerido!' }),
+  idMunicipio: zod.number().min(1, { message: '¡Municipio es requerido!' }),
+  estado: zod.enum(['activo', 'inactivo']).optional(),
 });
 
-// ----------------------------------------------------------------------
+import type {
+  IRolAPI,
+  IUsuarioAPI,
+  IProfesionAPI,
+  IDepartamentoAPI,
+  ITipoDocumentoAPI,
+} from 'src/api';
 
+import { useState, useEffect } from 'react';
+
+import { MenuItem } from '@mui/material';
+
+import {
+  RolService,
+  UsuarioService,
+  ProfesionService,
+  DepartamentoService,
+  TipoDocumentoService,
+} from 'src/api';
+
+import { LoadingScreen } from 'src/components/loading-screen';
+
+// Update Props type to use IUsuarioAPI
 type Props = {
-  currentUser?: IUserItem;
+  currentUser?: IUsuarioAPI;
 };
 
 export function UserNewEditForm({ currentUser }: Props) {
   const router = useRouter();
+  const [tiposDocumento, setTiposDocumento] = useState<ITipoDocumentoAPI[]>([]);
+  const [profesiones, setProfesiones] = useState<IProfesionAPI[]>([]);
+  const [roles, setRoles] = useState<IRolAPI[]>([]);
+  const [departamentos, setDepartamentos] = useState<IDepartamentoAPI[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+
+        // Fetch document types
+        const tiposDocResponse = await TipoDocumentoService.getTiposDocumento();
+        setTiposDocumento(tiposDocResponse.items);
+
+        // Fetch professions
+        const profesionesResponse = await ProfesionService.getProfesiones();
+        setProfesiones(profesionesResponse.items);
+
+        // Fetch roles
+        const rolesResponse = await RolService.getRoles();
+        setRoles(rolesResponse.items);
+
+        // Fetch departamentos
+        const departamentosResponse = await DepartamentoService.getDepartamentos({
+          limit: 25,
+        });
+        setDepartamentos(departamentosResponse.items);
+      } catch (error) {
+        console.error('Error fetching form data:', error);
+        toast.error('Error al cargar los datos del formulario');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const defaultValues: NewUserSchemaType = {
-    status: '',
-    avatarUrl: null,
-    isVerified: true,
-    name: '',
+    nombres: '',
+    apellidos: '',
+    direccion: '',
+    telefono: '',
     email: '',
-    phoneNumber: '',
-    country: '',
-    state: '',
-    city: '',
-    address: '',
-    zipCode: '',
-    company: '',
-    role: '',
+    idTipoDocumentoIdentificacion: 0,
+    documentoIdentificacion: '',
+    // imagen: null,
+    fechaNacimiento: '',
+    colegiado: '',
+    idProfesion: undefined,
+    idDepartamento: 0,
+    idRol: 0,
+    idMunicipio: 0,
+    estado: 'activo',
   };
+
+  // Map currentUser.estado from number to string if needed
+  const mappedCurrentUser = currentUser
+    ? {
+        ...currentUser,
+        estado: currentUser.estado === 1 ? 'activo' : 'inactivo',
+      }
+    : undefined;
 
   const methods = useForm<NewUserSchemaType>({
     mode: 'onSubmit',
     resolver: zodResolver(NewUserSchema),
     defaultValues,
-    values: currentUser,
+    values: mappedCurrentUser as any,
   });
 
   const {
@@ -91,19 +158,37 @@ export function UserNewEditForm({ currentUser }: Props) {
     formState: { isSubmitting },
   } = methods;
 
+  // Watch for changes in the selected department
+  const selectedDepartamentoId = watch('idDepartamento');
+
   const values = watch();
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      reset();
-      toast.success(currentUser ? 'Update success!' : 'Create success!');
+      if (currentUser) {
+        await UsuarioService.updateUsuario(currentUser.id, {
+          ...data,
+          estado: data.estado === 'activo' ? 1 : 0,
+        });
+      } else {
+        await UsuarioService.createUsuario({
+          ...data,
+          fechaNacimiento: data.fechaNacimiento.split('T')[0],
+          estado: 1,
+        });
+      }
+
+      toast.success(currentUser ? '¡Actualización exitosa!' : '¡Creación exitosa!');
       router.push(paths.dashboard.user.list);
-      console.info('DATA', data);
     } catch (error) {
-      console.error(error);
+      console.error('Error:', error);
+      toast.error('Error al guardar el usuario');
     }
   });
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <Form methods={methods} onSubmit={onSubmit}>
@@ -112,20 +197,16 @@ export function UserNewEditForm({ currentUser }: Props) {
           <Card sx={{ pt: 10, pb: 5, px: 3 }}>
             {currentUser && (
               <Label
-                color={
-                  (values.status === 'active' && 'success') ||
-                  (values.status === 'banned' && 'error') ||
-                  'warning'
-                }
+                color={(values.estado === 'activo' && 'success') || 'error'}
                 sx={{ position: 'absolute', top: 24, right: 24 }}
               >
-                {values.status}
+                {values.estado}
               </Label>
             )}
 
             <Box sx={{ mb: 5 }}>
               <Field.UploadAvatar
-                name="avatarUrl"
+                name="imagen"
                 maxSize={3145728}
                 helperText={
                   <Typography
@@ -138,8 +219,8 @@ export function UserNewEditForm({ currentUser }: Props) {
                       color: 'text.disabled',
                     }}
                   >
-                    Allowed *.jpeg, *.jpg, *.png, *.gif
-                    <br /> max size of {fData(3145728)}
+                    Permitidos *.jpeg, *.jpg, *.png, *.gif
+                    <br /> tamaño máximo de {fData(3145728)}
                   </Typography>
                 }
               />
@@ -150,14 +231,14 @@ export function UserNewEditForm({ currentUser }: Props) {
                 labelPlacement="start"
                 control={
                   <Controller
-                    name="status"
+                    name="estado"
                     control={control}
                     render={({ field }) => (
                       <Switch
                         {...field}
-                        checked={field.value !== 'active'}
+                        checked={field.value === 'activo'}
                         onChange={(event) =>
-                          field.onChange(event.target.checked ? 'banned' : 'active')
+                          field.onChange(event.target.checked ? 'activo' : 'inactivo')
                         }
                       />
                     )}
@@ -166,10 +247,10 @@ export function UserNewEditForm({ currentUser }: Props) {
                 label={
                   <>
                     <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-                      Banned
+                      Estado
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      Apply disable account
+                      Activar/Desactivar usuario
                     </Typography>
                   </>
                 }
@@ -182,26 +263,10 @@ export function UserNewEditForm({ currentUser }: Props) {
               />
             )}
 
-            <Field.Switch
-              name="isVerified"
-              labelPlacement="start"
-              label={
-                <>
-                  <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-                    Email verified
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    Disabling this will automatically send the user a verification email
-                  </Typography>
-                </>
-              }
-              sx={{ mx: 0, width: 1, justifyContent: 'space-between' }}
-            />
-
             {currentUser && (
               <Stack sx={{ mt: 3, alignItems: 'center', justifyContent: 'center' }}>
                 <Button variant="soft" color="error">
-                  Delete user
+                  Eliminar usuario
                 </Button>
               </Stack>
             )}
@@ -218,32 +283,97 @@ export function UserNewEditForm({ currentUser }: Props) {
                 gridTemplateColumns: { xs: 'repeat(1, 1fr)', sm: 'repeat(2, 1fr)' },
               }}
             >
-              <Field.Text name="name" label="Full name" />
-              <Field.Text name="email" label="Email address" />
+              <Field.Text name="nombres" label="Nombres" />
+              <Field.Text name="apellidos" label="Apellidos" />
+              <Field.Select
+                name="idTipoDocumentoIdentificacion"
+                label="Tipo de documento"
+                placeholder="Seleccione un tipo"
+                disabled={isLoading}
+              >
+                {tiposDocumento.map((tipo) => (
+                  <MenuItem key={tipo.id} value={tipo.id}>
+                    {tipo.nombre}
+                  </MenuItem>
+                ))}
+              </Field.Select>
+              <Field.Text name="documentoIdentificacion" label="Documento de identificación" />
+              <Field.Text
+                name="email"
+                label="Correo electrónico"
+                placeholder="ejemplo@cunreu.com"
+              />
               <Field.Phone
-                name="phoneNumber"
-                label="Phone number"
-                country={!currentUser ? 'DE' : undefined}
+                name="telefono"
+                label="Número de teléfono"
+                placeholder="Ingrese un teléfono"
+                country={!currentUser ? 'GT' : undefined}
               />
-
-              <Field.CountrySelect
+              <Field.Text
+                name="direccion"
+                label="Dirección"
+                multiline
+                rows={2}
                 fullWidth
-                name="country"
-                label="Country"
-                placeholder="Choose a country"
+                sx={{ gridColumn: { sm: 'span 2' } }}
               />
-
-              <Field.Text name="state" label="State/region" />
-              <Field.Text name="city" label="City" />
-              <Field.Text name="address" label="Address" />
-              <Field.Text name="zipCode" label="Zip/code" />
-              <Field.Text name="company" label="Company" />
-              <Field.Text name="role" label="Role" />
+              <Field.DatePicker name="fechaNacimiento" label="Fecha de nacimiento" />
+              <Field.Select
+                name="idProfesion"
+                label="Profesión"
+                placeholder="Seleccione una profesión"
+                disabled={isLoading}
+              >
+                {profesiones.map((profesion) => (
+                  <MenuItem key={profesion.id} value={profesion.id}>
+                    {profesion.descripcion}
+                  </MenuItem>
+                ))}
+              </Field.Select>
+              <Field.Text name="colegiado" label="Número de colegiado" />
+              <Field.Select
+                name="idRol"
+                label="Rol"
+                placeholder="Seleccione un rol"
+                disabled={isLoading}
+              >
+                {roles.map((rol) => (
+                  <MenuItem key={rol.id} value={rol.id}>
+                    {rol.nombre}
+                  </MenuItem>
+                ))}
+              </Field.Select>
+              <Field.Select
+                name="idDepartamento"
+                label="Departamento"
+                placeholder="Seleccione un departamento"
+                disabled={isLoading}
+              >
+                {departamentos.map((departamento) => (
+                  <MenuItem key={departamento.id} value={departamento.id}>
+                    {departamento.nombre}
+                  </MenuItem>
+                ))}
+              </Field.Select>
+              <Field.Select
+                name="idMunicipio"
+                label="Municipio"
+                placeholder="Seleccione un municipio"
+                disabled={!selectedDepartamentoId}
+              >
+                {departamentos
+                  .find((departamento) => departamento.id === selectedDepartamentoId)
+                  ?.municipios?.map((municipio) => (
+                    <MenuItem key={municipio.id} value={municipio.id}>
+                      {municipio.nombre}
+                    </MenuItem>
+                  ))}
+              </Field.Select>
             </Box>
 
             <Stack sx={{ mt: 3, alignItems: 'flex-end' }}>
               <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
-                {!currentUser ? 'Create user' : 'Save changes'}
+                {!currentUser ? 'Crear usuario' : 'Guardar cambios'}
               </LoadingButton>
             </Stack>
           </Card>

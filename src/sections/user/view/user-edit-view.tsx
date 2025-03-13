@@ -1,4 +1,4 @@
-import type { IUserItem } from 'src/types/user';
+import type { IUsuarioAPI } from 'src/api';
 
 import { paths } from 'src/routes/paths';
 
@@ -11,7 +11,7 @@ import { UserNewEditForm } from '../user-new-edit-form';
 // ----------------------------------------------------------------------
 
 type Props = {
-  user?: IUserItem;
+  user?: IUsuarioAPI;
 };
 
 export function UserEditView({ user: currentUser }: Props) {
@@ -23,7 +23,7 @@ export function UserEditView({ user: currentUser }: Props) {
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
           { name: 'User', href: paths.dashboard.user.root },
-          { name: currentUser?.name },
+          { name: currentUser?.nombres },
         ]}
         sx={{ mb: { xs: 3, md: 5 } }}
       />

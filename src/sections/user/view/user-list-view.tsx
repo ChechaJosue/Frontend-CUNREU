@@ -1,27 +1,25 @@
+import type { IUsuarioTableFilters } from 'src/types/user';
 import type { TableHeadCellProps } from 'src/components/table';
-import type { IUserItem, IUserTableFilters } from 'src/types/user';
+import type { IUsuarioAPI } from 'src/api/services/usuario.service';
 
-import { useState, useCallback } from 'react';
-import { varAlpha } from 'minimal-shared/utils';
+import { useState, useEffect, useCallback } from 'react';
 import { useBoolean, useSetState } from 'minimal-shared/hooks';
 
 import Box from '@mui/material/Box';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import TableBody from '@mui/material/TableBody';
 import IconButton from '@mui/material/IconButton';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { _roles, _userList, USER_STATUS_OPTIONS } from 'src/_mock';
+import { UsuarioService } from 'src/api/services/usuario.service';
 
-import { Label } from 'src/components/label';
 import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
@@ -30,7 +28,6 @@ import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 import {
   useTable,
   emptyRows,
-  rowInPage,
   TableNoData,
   getComparator,
   TableEmptyRows,
@@ -40,19 +37,19 @@ import {
 } from 'src/components/table';
 
 import { UserTableRow } from '../user-table-row';
-import { UserTableToolbar } from '../user-table-toolbar';
 import { UserTableFiltersResult } from '../user-table-filters-result';
 
 // ----------------------------------------------------------------------
 
-const STATUS_OPTIONS = [{ value: 'all', label: 'Todos' }, ...USER_STATUS_OPTIONS];
+// Traducción de opciones de estado
+// const STATUS_OPTIONS = [{ value: 'all', label: 'Todos' }, ...USUARIO_STATUS_OPTIONS];
 
 const TABLE_HEAD: TableHeadCellProps[] = [
   { id: 'id', label: 'ID' },
-  { id: 'nombres', label: 'Nombres' },
-  { id: 'apellidos', label: 'Apellidos' },
+  { id: 'nombres', label: 'Nombre' },
   { id: 'rol', label: 'Rol', width: 180 },
-  { id: 'status', label: 'Status', width: 100 },
+  { id: 'email', label: 'Correo' },
+  { id: 'estado', label: 'Estado', width: 100 },
   { id: '', width: 88 },
 ];
 
@@ -60,13 +57,48 @@ const TABLE_HEAD: TableHeadCellProps[] = [
 
 export function UserListView() {
   const table = useTable();
-
   const confirmDialog = useBoolean();
+  const [loading, setLoading] = useState(false);
+  const [tableData, setTableData] = useState<IUsuarioAPI[]>([]);
+  const [paginationData, setPaginationData] = useState({
+    total: 0,
+    totalPages: 0,
+  });
 
-  const [tableData, setTableData] = useState<IUserItem[]>(_userList);
-
-  const filters = useSetState<IUserTableFilters>({ name: '', role: [], status: 'all' });
+  const filters = useSetState<IUsuarioTableFilters>({
+    nombres: '',
+    apellidos: '',
+    rol: [],
+    estado: 'all',
+  });
   const { state: currentFilters, setState: updateFilters } = filters;
+
+  // Fetch users from API
+  const fetchUsers = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await UsuarioService.getUsuarios({
+        page: table.page + 1,
+        limit: table.rowsPerPage,
+      });
+
+      setTableData(response.items);
+      setPaginationData({
+        total: response.total,
+        totalPages: response.totalPages,
+      });
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast.error('Error al cargar los usuarios');
+    } finally {
+      setLoading(false);
+    }
+  }, [table.page, table.rowsPerPage, currentFilters]);
+
+  // Initial fetch and refetch when dependencies change
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const dataFiltered = applyFilter({
     inputData: tableData,
@@ -74,40 +106,45 @@ export function UserListView() {
     filters: currentFilters,
   });
 
-  const dataInPage = rowInPage(dataFiltered, table.page, table.rowsPerPage);
-
   const canReset =
-    !!currentFilters.name || currentFilters.role.length > 0 || currentFilters.status !== 'all';
+    !!currentFilters.nombres || currentFilters.rol.length > 0 || currentFilters.estado !== 'all';
 
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
   const handleDeleteRow = useCallback(
-    (id: string) => {
-      const deleteRow = tableData.filter((row) => row.id !== id);
-
-      toast.success('Delete success!');
-
-      setTableData(deleteRow);
-
-      table.onUpdatePageDeleteRow(dataInPage.length);
+    async (id: string | number) => {
+      try {
+        await UsuarioService.deleteUsuario(id);
+        toast.success('¡Usuario desactivado con éxito!');
+        fetchUsers(); // Refresh the list
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        toast.error('Error al desactivar el usuario');
+      }
     },
-    [dataInPage.length, table, tableData]
+    [fetchUsers]
   );
 
-  const handleDeleteRows = useCallback(() => {
-    const deleteRows = tableData.filter((row) => !table.selected.includes(row.id));
+  const handleDeleteRows = useCallback(async () => {
+    try {
+      // Process deletions sequentially
+      for (const id of table.selected) {
+        await UsuarioService.deleteUsuario(id);
+      }
 
-    toast.success('Delete success!');
-
-    setTableData(deleteRows);
-
-    table.onUpdatePageDeleteRows(dataInPage.length, dataFiltered.length);
-  }, [dataFiltered.length, dataInPage.length, table, tableData]);
+      toast.success('¡Usuarios desactivados con éxito!');
+      table.onSelectAllRows(false, []); // Clear selection
+      fetchUsers(); // Refresh the list
+    } catch (error) {
+      console.error('Error deleting users:', error);
+      toast.error('Error al desactivar los usuarios');
+    }
+  }, [table, fetchUsers]);
 
   const handleFilterStatus = useCallback(
     (event: React.SyntheticEvent, newValue: string) => {
       table.onResetPage();
-      updateFilters({ status: newValue });
+      updateFilters({ estado: newValue });
     },
     [updateFilters, table]
   );
@@ -116,10 +153,10 @@ export function UserListView() {
     <ConfirmDialog
       open={confirmDialog.value}
       onClose={confirmDialog.onFalse}
-      title="Delete"
+      title="Desactivar"
       content={
         <>
-          Are you sure want to delete <strong> {table.selected.length} </strong> items?
+          ¿Está seguro que desea desactivar <strong> {table.selected.length} </strong> usuarios?
         </>
       }
       action={
@@ -131,7 +168,7 @@ export function UserListView() {
             confirmDialog.onFalse();
           }}
         >
-          Delete
+          Desactivar
         </Button>
       }
     />
@@ -141,7 +178,7 @@ export function UserListView() {
     <>
       <DashboardContent>
         <CustomBreadcrumbs
-          heading="Lista"
+          heading="Lista de Usuarios"
           links={[
             { name: 'Dashboard', href: paths.dashboard.root },
             { name: 'Usuarios', href: paths.dashboard.user.root },
@@ -161,54 +198,10 @@ export function UserListView() {
         />
 
         <Card>
-          <Tabs
-            value={currentFilters.status}
-            onChange={handleFilterStatus}
-            sx={[
-              (theme) => ({
-                px: 2.5,
-                boxShadow: `inset 0 -2px 0 0 ${varAlpha(theme.vars.palette.grey['500Channel'], 0.08)}`,
-              }),
-            ]}
-          >
-            {STATUS_OPTIONS.map((tab) => (
-              <Tab
-                key={tab.value}
-                iconPosition="end"
-                value={tab.value}
-                label={tab.label}
-                icon={
-                  <Label
-                    variant={
-                      ((tab.value === 'all' || tab.value === currentFilters.status) && 'filled') ||
-                      'soft'
-                    }
-                    color={
-                      (tab.value === 'active' && 'success') ||
-                      (tab.value === 'pending' && 'warning') ||
-                      (tab.value === 'banned' && 'error') ||
-                      'default'
-                    }
-                  >
-                    {['active', 'pending', 'banned', 'rejected'].includes(tab.value)
-                      ? tableData.filter((user) => user.status === tab.value).length
-                      : tableData.length}
-                  </Label>
-                }
-              />
-            ))}
-          </Tabs>
-
-          <UserTableToolbar
-            filters={filters}
-            onResetPage={table.onResetPage}
-            options={{ roles: _roles }}
-          />
-
           {canReset && (
             <UserTableFiltersResult
               filters={filters}
-              totalResults={dataFiltered.length}
+              totalResults={paginationData.total}
               onResetPage={table.onResetPage}
               sx={{ p: 2.5, pt: 0 }}
             />
@@ -222,11 +215,11 @@ export function UserListView() {
               onSelectAllRows={(checked) =>
                 table.onSelectAllRows(
                   checked,
-                  dataFiltered.map((row) => row.id)
+                  dataFiltered.map((row) => `${row.id}`)
                 )
               }
               action={
-                <Tooltip title="Delete">
+                <Tooltip title="Desactivar">
                   <IconButton color="primary" onClick={confirmDialog.onTrue}>
                     <Iconify icon="solar:trash-bin-trash-bold" />
                   </IconButton>
@@ -235,58 +228,59 @@ export function UserListView() {
             />
 
             <Scrollbar>
-              <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
-                <TableHeadCustom
-                  order={table.order}
-                  orderBy={table.orderBy}
-                  headCells={TABLE_HEAD}
-                  rowCount={dataFiltered.length}
-                  numSelected={table.selected.length}
-                  onSort={table.onSort}
-                  onSelectAllRows={(checked) =>
-                    table.onSelectAllRows(
-                      checked,
-                      dataFiltered.map((row) => row.id)
-                    )
-                  }
-                />
-
-                <TableBody>
-                  {dataFiltered
-                    .slice(
-                      table.page * table.rowsPerPage,
-                      table.page * table.rowsPerPage + table.rowsPerPage
-                    )
-                    .map((row) => (
-                      <UserTableRow
-                        key={row.id}
-                        row={row}
-                        selected={table.selected.includes(row.id)}
-                        onSelectRow={() => table.onSelectRow(row.id)}
-                        onDeleteRow={() => handleDeleteRow(row.id)}
-                        editHref={paths.dashboard.user.edit(row.id)}
-                      />
-                    ))}
-
-                  <TableEmptyRows
-                    height={table.dense ? 56 : 56 + 20}
-                    emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
+              {loading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', my: 5 }}>
+                  <CircularProgress />
+                </Box>
+              ) : (
+                <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
+                  <TableHeadCustom
+                    order={table.order}
+                    orderBy={table.orderBy}
+                    headCells={TABLE_HEAD}
+                    rowCount={dataFiltered.length}
+                    onSort={table.onSort}
                   />
 
-                  <TableNoData notFound={notFound} />
-                </TableBody>
-              </Table>
+                  <TableBody>
+                    {dataFiltered
+                      .slice(
+                        table.page * table.rowsPerPage,
+                        table.page * table.rowsPerPage + table.rowsPerPage
+                      )
+                      .map((row) => (
+                        <UserTableRow
+                          key={row.id}
+                          row={row}
+                          selected={table.selected.includes(String(row.id))}
+                          onSelectRow={() => table.onSelectRow(String(row.id))}
+                          onDeleteRow={() => handleDeleteRow(row.id)}
+                          editHref={paths.dashboard.user.edit(String(row.id))}
+                        />
+                      ))}
+
+                    <TableEmptyRows
+                      height={table.dense ? 56 : 56 + 20}
+                      emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
+                    />
+
+                    <TableNoData notFound={notFound} />
+                  </TableBody>
+                </Table>
+              )}
             </Scrollbar>
           </Box>
 
           <TablePaginationCustom
             page={table.page}
             dense={table.dense}
-            count={dataFiltered.length}
+            count={paginationData.total}
             rowsPerPage={table.rowsPerPage}
             onPageChange={table.onChangePage}
             onChangeDense={table.onChangeDense}
             onRowsPerPageChange={table.onChangeRowsPerPage}
+            labelRowsPerPage="Filas por página:"
+            labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
           />
         </Card>
       </DashboardContent>
@@ -299,14 +293,13 @@ export function UserListView() {
 // ----------------------------------------------------------------------
 
 type ApplyFilterProps = {
-  inputData: IUserItem[];
-  filters: IUserTableFilters;
+  inputData: IUsuarioAPI[];
+  filters: IUsuarioTableFilters;
   comparator: (a: any, b: any) => number;
 };
 
-function applyFilter({ inputData, comparator, filters }: ApplyFilterProps) {
-  const { name, status, role } = filters;
-
+// Since filtering is now handled by the API, this function is simplified
+function applyFilter({ inputData, comparator }: ApplyFilterProps) {
   const stabilizedThis = inputData.map((el, index) => [el, index] as const);
 
   stabilizedThis.sort((a, b) => {
@@ -315,19 +308,5 @@ function applyFilter({ inputData, comparator, filters }: ApplyFilterProps) {
     return a[1] - b[1];
   });
 
-  inputData = stabilizedThis.map((el) => el[0]);
-
-  if (name) {
-    inputData = inputData.filter((user) => user.name.toLowerCase().includes(name.toLowerCase()));
-  }
-
-  if (status !== 'all') {
-    inputData = inputData.filter((user) => user.status === status);
-  }
-
-  if (role.length) {
-    inputData = inputData.filter((user) => role.includes(user.role));
-  }
-
-  return inputData;
+  return stabilizedThis.map((el) => el[0]);
 }

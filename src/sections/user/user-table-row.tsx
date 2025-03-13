@@ -1,17 +1,13 @@
-import type { IUserItem } from 'src/types/user';
+import type { IUsuarioAPI } from 'src/api/services/usuario.service';
 
 import { useBoolean, usePopover } from 'minimal-shared/hooks';
 
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Avatar from '@mui/material/Avatar';
-import Tooltip from '@mui/material/Tooltip';
 import MenuList from '@mui/material/MenuList';
 import MenuItem from '@mui/material/MenuItem';
 import TableRow from '@mui/material/TableRow';
-import Checkbox from '@mui/material/Checkbox';
 import TableCell from '@mui/material/TableCell';
 import IconButton from '@mui/material/IconButton';
 
@@ -22,12 +18,10 @@ import { Iconify } from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { CustomPopover } from 'src/components/custom-popover';
 
-import { UserQuickEditForm } from './user-quick-edit-form';
-
 // ----------------------------------------------------------------------
 
 type Props = {
-  row: IUserItem;
+  row: IUsuarioAPI;
   selected: boolean;
   editHref: string;
   onSelectRow: () => void;
@@ -39,13 +33,13 @@ export function UserTableRow({ row, selected, editHref, onSelectRow, onDeleteRow
   const confirmDialog = useBoolean();
   const quickEditForm = useBoolean();
 
-  const renderQuickEditForm = () => (
-    <UserQuickEditForm
-      currentUser={row}
-      open={quickEditForm.value}
-      onClose={quickEditForm.onFalse}
-    />
-  );
+  // const renderQuickEditForm = () => (
+  //   <UserQuickEditForm
+  //     currentUser={row}
+  //     open={quickEditForm.value}
+  //     onClose={quickEditForm.onFalse}
+  //   />
+  // );
 
   const renderMenuActions = () => (
     <CustomPopover
@@ -58,7 +52,7 @@ export function UserTableRow({ row, selected, editHref, onSelectRow, onDeleteRow
         <li>
           <MenuItem component={RouterLink} href={editHref} onClick={() => menuActions.onClose()}>
             <Iconify icon="solar:pen-bold" />
-            Edit
+            Editar
           </MenuItem>
         </li>
 
@@ -69,8 +63,9 @@ export function UserTableRow({ row, selected, editHref, onSelectRow, onDeleteRow
           }}
           sx={{ color: 'error.main' }}
         >
-          <Iconify icon="solar:trash-bin-trash-bold" />
-          Delete
+          {/* <Iconify icon="solar:trash-bin-trash-bold" /> */}
+          <Iconify icon="fa6-solid:power-off" />
+          Desactivar
         </MenuItem>
       </MenuList>
     </CustomPopover>
@@ -80,11 +75,16 @@ export function UserTableRow({ row, selected, editHref, onSelectRow, onDeleteRow
     <ConfirmDialog
       open={confirmDialog.value}
       onClose={confirmDialog.onFalse}
-      title="Delete"
-      content="Are you sure want to delete?"
+      title="Desactivar"
+      content={
+        <>
+          ¿Está seguro de desactivar al usuario <strong>{`${row.nombres} ${row.apellidos}`}</strong>
+          ?
+        </>
+      }
       action={
-        <Button variant="contained" color="error" onClick={onDeleteRow}>
-          Delete
+        <Button variant="contained" color="warning" onClick={onDeleteRow}>
+          Desactivar
         </Button>
       }
     />
@@ -93,67 +93,39 @@ export function UserTableRow({ row, selected, editHref, onSelectRow, onDeleteRow
   return (
     <>
       <TableRow hover selected={selected} aria-checked={selected} tabIndex={-1}>
-        <TableCell padding="checkbox">
-          <Checkbox
-            checked={selected}
-            onClick={onSelectRow}
-            inputProps={{
-              id: `${row.id}-checkbox`,
-              'aria-label': `${row.id} checkbox`,
-            }}
-          />
-        </TableCell>
-
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.id}</TableCell>
         <TableCell>
           <Box sx={{ gap: 2, display: 'flex', alignItems: 'center' }}>
-            <Avatar alt={row.name} src={row.avatarUrl} />
-
             <Stack sx={{ typography: 'body2', flex: '1 1 auto', alignItems: 'flex-start' }}>
-              <Link
-                component={RouterLink}
-                href={editHref}
-                color="inherit"
-                sx={{ cursor: 'pointer' }}
-              >
-                {row.name}
-              </Link>
-              <Box component="span" sx={{ color: 'text.disabled' }}>
-                {row.email}
-              </Box>
+              <Box component="span">{`${row.nombres}`}</Box>
+              <Box component="span">{`${row.apellidos}`}</Box>
             </Stack>
           </Box>
         </TableCell>
 
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.phoneNumber}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.rol.nombre}</TableCell>
 
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.company}</TableCell>
-
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.role}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.email}</TableCell>
 
         <TableCell>
           <Label
             variant="soft"
-            color={
-              (row.status === 'active' && 'success') ||
-              (row.status === 'pending' && 'warning') ||
-              (row.status === 'banned' && 'error') ||
-              'default'
-            }
+            color={(row.estado === 1 && 'success') || (row.estado === 0 && 'warning') || 'default'}
           >
-            {row.status}
+            {row.estado === 1 ? 'activo' : 'inactivo'}
           </Label>
         </TableCell>
 
         <TableCell>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Tooltip title="Quick Edit" placement="top" arrow>
+            {/* <Tooltip title="Quick Edit" placement="top" arrow>
               <IconButton
                 color={quickEditForm.value ? 'inherit' : 'default'}
                 onClick={quickEditForm.onTrue}
               >
                 <Iconify icon="solar:pen-bold" />
               </IconButton>
-            </Tooltip>
+            </Tooltip> */}
 
             <IconButton
               color={menuActions.open ? 'inherit' : 'default'}
@@ -165,7 +137,7 @@ export function UserTableRow({ row, selected, editHref, onSelectRow, onDeleteRow
         </TableCell>
       </TableRow>
 
-      {renderQuickEditForm()}
+      {/* {renderQuickEditForm()} */}
       {renderMenuActions()}
       {renderConfirmDialog()}
     </>

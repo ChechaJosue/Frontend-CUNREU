@@ -1,4 +1,4 @@
-import type { IUserItem } from 'src/types/user';
+import type { IUsuario } from 'src/types/user';
 
 import { z as zod } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -25,24 +25,19 @@ import { Form, Field, schemaHelper } from 'src/components/hook-form';
 export type UserQuickEditSchemaType = zod.infer<typeof UserQuickEditSchema>;
 
 export const UserQuickEditSchema = zod.object({
-  name: zod.string().min(1, { message: 'Name is required!' }),
+  nombres: zod.string().min(1, { message: 'Name is required!' }),
   email: zod
     .string()
     .min(1, { message: 'Email is required!' })
     .email({ message: 'Email must be a valid email address!' }),
-  phoneNumber: schemaHelper.phoneNumber({ isValid: isValidPhoneNumber }),
-  country: schemaHelper.nullableInput(zod.string().min(1, { message: 'Country is required!' }), {
-    // message for null value
-    message: 'Country is required!',
-  }),
-  state: zod.string().min(1, { message: 'State is required!' }),
-  city: zod.string().min(1, { message: 'City is required!' }),
-  address: zod.string().min(1, { message: 'Address is required!' }),
-  zipCode: zod.string().min(1, { message: 'Zip code is required!' }),
-  company: zod.string().min(1, { message: 'Company is required!' }),
-  role: zod.string().min(1, { message: 'Role is required!' }),
-  // Not required
-  status: zod.string(),
+  apellidos: schemaHelper.phoneNumber({ isValid: isValidPhoneNumber }),
+  // state: zod.string().min(1, { message: 'State is required!' }),
+  // city: zod.string().min(1, { message: 'City is required!' }),
+  // address: zod.string().min(1, { message: 'Address is required!' }),
+  // zipCode: zod.string().min(1, { message: 'Zip code is required!' }),
+  // company: zod.string().min(1, { message: 'Company is required!' }),
+  // role: zod.string().min(1, { message: 'Role is required!' }),
+  // status: zod.string(),
 });
 
 // ----------------------------------------------------------------------
@@ -50,22 +45,14 @@ export const UserQuickEditSchema = zod.object({
 type Props = {
   open: boolean;
   onClose: () => void;
-  currentUser?: IUserItem;
+  currentUser?: IUsuario;
 };
 
 export function UserQuickEditForm({ currentUser, open, onClose }: Props) {
   const defaultValues: UserQuickEditSchemaType = {
-    name: '',
+    nombres: '',
     email: '',
-    phoneNumber: '',
-    address: '',
-    country: '',
-    state: '',
-    city: '',
-    zipCode: '',
-    status: '',
-    company: '',
-    role: '',
+    apellidos: '',
   };
 
   const methods = useForm<UserQuickEditSchemaType>({

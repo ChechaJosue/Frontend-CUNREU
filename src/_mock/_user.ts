@@ -1,3 +1,5 @@
+import type { IUsuario } from 'src/types/user';
+
 import { _mock } from './_mock';
 
 // ----------------------------------------------------------------------
@@ -7,6 +9,11 @@ export const USER_STATUS_OPTIONS = [
   { value: 'pending', label: 'Pending' },
   { value: 'banned', label: 'Banned' },
   { value: 'rejected', label: 'Inactivo' },
+];
+
+export const USUARIO_STATUS_OPTIONS = [
+  { value: 'activo', label: 'Activo' },
+  { value: 'inactivo', label: 'Inactivo' },
 ];
 
 export const _userAbout = {
@@ -142,12 +149,21 @@ export const _userList = Array.from({ length: 20 }, (_, index) => ({
     (index % 2 && 'pending') || (index % 3 && 'banned') || (index % 4 && 'rejected') || 'active',
 }));
 
-export const _listaUsuarios = Array.from({ length: 20 }, (_, index) => ({
-  id: _mock.id(index),
+export const _listaUsuarios: IUsuario[] = Array.from({ length: 20 }, (_, index) => ({
+  id: `${index + 1}`,
   rol: _mock.role(index),
   email: _mock.email(index),
   nombres: _mock.firstName(index),
   apellidos: _mock.lastName(index),
-  status:
-    (index % 2 && 'pending') || (index % 3 && 'banned') || (index % 4 && 'rejected') || 'active',
+  estado: index % 2 === 0 ? 'activo' : 'inactivo',
+  direccion: _mock.fullAddress(index),
+  telefono: _mock.phoneNumber(index),
+  idTipoDocumentoIdentificacion: (index % 3) + 1,
+  documentoIdentificacion: `${1000000 + index}`,
+  imagen: _mock.image.avatar(index),
+  fechaNacimiento: _mock.time(index),
+  colegiado: index % 2 === 0 ? `COL-${10000 + index}` : undefined,
+  idProfesion: (index % 5) + 1,
+  idRol: (index % 3) + 1,
+  idMunicipio: (index % 10) + 1,
 }));
