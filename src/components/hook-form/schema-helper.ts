@@ -18,12 +18,12 @@ export const schemaHelper = {
   phoneNumber: (props?: { message?: MessageMapProps; isValid?: (text: string) => boolean }) =>
     zod
       .string({
-        required_error: props?.message?.required ?? 'Phone number is required!',
-        invalid_type_error: props?.message?.invalid_type ?? 'Invalid phone number!',
+        required_error: props?.message?.required ?? 'El número de teléfono es requerido',
+        invalid_type_error: props?.message?.invalid_type ?? 'Número de teléfono inválido',
       })
-      .min(1, { message: props?.message?.required ?? 'Phone number is required!' })
+      .min(1, { message: props?.message?.required ?? 'El número de teléfono es requerido' })
       .refine((data) => props?.isValid?.(data), {
-        message: props?.message?.invalid_type ?? 'Invalid phone number!',
+        message: props?.message?.invalid_type ?? 'Número de teléfono inválido',
       }),
   /**
    * Date

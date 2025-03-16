@@ -77,7 +77,7 @@ export const navData: NavSectionProps['data'] = [
           { title: 'Lista', path: paths.dashboard.user.list },
           { title: 'Crear', path: paths.dashboard.user.new },
           { title: 'Editar', path: paths.dashboard.user.demo.edit },
-          { title: 'Mi cuenta', path: paths.dashboard.user.account },
+          // { title: 'Mi cuenta', path: paths.dashboard.user.account },
         ],
       },
       {

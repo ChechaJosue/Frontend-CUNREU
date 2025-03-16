@@ -18,11 +18,11 @@ export function UserEditView({ user: currentUser }: Props) {
   return (
     <DashboardContent>
       <CustomBreadcrumbs
-        heading="Edit"
+        heading="Editar"
         backHref={paths.dashboard.user.list}
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
-          { name: 'User', href: paths.dashboard.user.root },
+          { name: 'Usuarios', href: paths.dashboard.user.list },
           { name: currentUser?.nombres },
         ]}
         sx={{ mb: { xs: 3, md: 5 } }}

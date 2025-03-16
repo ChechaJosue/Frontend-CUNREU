@@ -116,7 +116,7 @@ export const UsuarioService = {
     >
   ): Promise<IUsuarioAPI> => {
     try {
-      const response = await axiosInstance.patch<IUsuarioAPI>(`/usuario/${id}`, usuario, {
+      const response = await axiosInstance.put<IUsuarioAPI>(`/usuario/${id}`, usuario, {
         headers: {
           'Content-Type': 'application/json',
         },

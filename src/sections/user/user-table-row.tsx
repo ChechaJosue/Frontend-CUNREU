@@ -31,7 +31,7 @@ type Props = {
 export function UserTableRow({ row, selected, editHref, onSelectRow, onDeleteRow }: Props) {
   const menuActions = usePopover();
   const confirmDialog = useBoolean();
-  const quickEditForm = useBoolean();
+  // const quickEditForm = useBoolean();
 
   // const renderQuickEditForm = () => (
   //   <UserQuickEditForm

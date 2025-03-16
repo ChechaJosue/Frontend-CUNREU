@@ -30,18 +30,38 @@ export const NewUserSchema = zod.object({
   nombres: zod.string().min(1, { message: '¡Nombres son requeridos!' }),
   apellidos: zod.string().min(1, { message: '¡Apellidos son requeridos!' }),
   direccion: zod.string().optional(),
-  telefono: schemaHelper.phoneNumber({ isValid: isValidPhoneNumber }),
+  telefono: schemaHelper.phoneNumber({
+    isValid: isValidPhoneNumber,
+  }),
   email: zod
     .string()
     .min(1, { message: '¡Email es requerido!' })
     .email({ message: '¡Email debe ser una dirección válida!' }),
   idTipoDocumentoIdentificacion: zod.number(),
   documentoIdentificacion: zod
-    .string()
-    .min(1, { message: '¡Documento de identificación es requerido!' }),
+    .number()
+    .min(1, { message: '¡Documento de identificación es requerido!' })
+    .transform((val) => val.toString())
+    .or(zod.string().min(1, { message: '¡Documento de identificación es requerido!' })),
   // imagen: schemaHelper.file({ message: '¡Imagen es requerida!' }),
   fechaNacimiento: zod.string().min(1, { message: '¡Fecha de nacimiento es requerida!' }),
-  colegiado: zod.string().optional(),
+  colegiado: zod
+    .number()
+    .optional()
+    .transform((val) => (val ? val.toString() : undefined))
+    .or(
+      zod
+        .string()
+        .optional()
+        .transform((val) => {
+          if (!val) return undefined;
+          const num = Number(val);
+          return isNaN(num) ? undefined : val;
+        })
+    ),
+  // .refine((val) => !val || /^\d+$/.test(val), {
+  //   message: 'El número de colegiado debe contener solo dígitos',
+  // }),
   idProfesion: zod.number().optional(),
   idRol: zod.number(),
   idDepartamento: zod.number().min(1, { message: '¡Departamento es requerido!' }),
@@ -140,6 +160,7 @@ export function UserNewEditForm({ currentUser }: Props) {
     ? {
         ...currentUser,
         estado: currentUser.estado === 1 ? 'activo' : 'inactivo',
+        idDepartamento: currentUser.municipio.idDepartamento,
       }
     : undefined;
 
@@ -160,6 +181,8 @@ export function UserNewEditForm({ currentUser }: Props) {
 
   // Watch for changes in the selected department
   const selectedDepartamentoId = watch('idDepartamento');
+  const selectedTipoDoc = watch('idTipoDocumentoIdentificacion');
+  const isDPI = tiposDocumento.find((tipo) => tipo.id === selectedTipoDoc)?.nombre === 'DPI';
 
   const values = watch();
 
@@ -178,7 +201,11 @@ export function UserNewEditForm({ currentUser }: Props) {
         });
       }
 
-      toast.success(currentUser ? '¡Actualización exitosa!' : '¡Creación exitosa!');
+      toast.success(
+        currentUser
+          ? `Usuario ${data.nombres} actualizado correctamente`
+          : `Usuario ${data.nombres} creado correctamente`
+      );
       router.push(paths.dashboard.user.list);
     } catch (error) {
       console.error('Error:', error);
@@ -297,11 +324,26 @@ export function UserNewEditForm({ currentUser }: Props) {
                   </MenuItem>
                 ))}
               </Field.Select>
-              <Field.Text name="documentoIdentificacion" label="Documento de identificación" />
+              <Field.Text
+                name="documentoIdentificacion"
+                label="Documento de identificación"
+                // type={isDPI ? 'number' : 'text'}
+                {...{
+                  ...(isDPI
+                    ? {
+                        maxLength: 13,
+                        type: 'number',
+                      }
+                    : {
+                        type: 'text',
+                      }),
+                }}
+              />
               <Field.Text
                 name="email"
                 label="Correo electrónico"
                 placeholder="ejemplo@cunreu.com"
+                type="email"
               />
               <Field.Phone
                 name="telefono"
@@ -330,7 +372,7 @@ export function UserNewEditForm({ currentUser }: Props) {
                   </MenuItem>
                 ))}
               </Field.Select>
-              <Field.Text name="colegiado" label="Número de colegiado" />
+              <Field.Text name="colegiado" label="Número de colegiado" type="number" />
               <Field.Select
                 name="idRol"
                 label="Rol"
