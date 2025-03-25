@@ -102,7 +102,7 @@ export const schemaHelper = {
    * Apply for upload single file.
    */
   file: (props?: { message: string }) =>
-    zod.custom<File | string | null>().transform((data, ctx) => {
+    zod.custom<File | string | undefined>().transform((data, ctx) => {
       const hasFile = data instanceof File || (typeof data === 'string' && !!data.length);
 
       if (!hasFile) {

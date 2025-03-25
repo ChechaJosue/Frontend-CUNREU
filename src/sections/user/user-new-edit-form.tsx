@@ -22,13 +22,11 @@ import { Label } from 'src/components/label';
 import { toast } from 'src/components/snackbar';
 import { Form, Field, schemaHelper } from 'src/components/hook-form';
 
-// ----------------------------------------------------------------------
-
 export type NewUserSchemaType = zod.infer<typeof NewUserSchema>;
 
 export const NewUserSchema = zod.object({
-  nombres: zod.string().min(1, { message: '¡Nombres son requeridos!' }),
-  apellidos: zod.string().min(1, { message: '¡Apellidos son requeridos!' }),
+  nombres: zod.string().min(1, { message: '¡Los nombres son requeridos!' }),
+  apellidos: zod.string().min(1, { message: '¡Los apellidos son requeridos!' }),
   direccion: zod.string().optional(),
   telefono: schemaHelper.phoneNumber({
     isValid: isValidPhoneNumber,
@@ -43,7 +41,7 @@ export const NewUserSchema = zod.object({
     .min(1, { message: '¡Documento de identificación es requerido!' })
     .transform((val) => val.toString())
     .or(zod.string().min(1, { message: '¡Documento de identificación es requerido!' })),
-  // imagen: schemaHelper.file({ message: '¡Imagen es requerida!' }),
+  imagen: zod.union([zod.string(), zod.instanceof(File)]).optional(),
   fechaNacimiento: zod.string().min(1, { message: '¡Fecha de nacimiento es requerida!' }),
   colegiado: zod
     .number()
@@ -59,9 +57,6 @@ export const NewUserSchema = zod.object({
           return isNaN(num) ? undefined : val;
         })
     ),
-  // .refine((val) => !val || /^\d+$/.test(val), {
-  //   message: 'El número de colegiado debe contener solo dígitos',
-  // }),
   idProfesion: zod.number().optional(),
   idRol: zod.number(),
   idDepartamento: zod.number().min(1, { message: '¡Departamento es requerido!' }),
@@ -91,7 +86,6 @@ import {
 
 import { LoadingScreen } from 'src/components/loading-screen';
 
-// Update Props type to use IUsuarioAPI
 type Props = {
   currentUser?: IUsuarioAPI;
 };
@@ -143,9 +137,9 @@ export function UserNewEditForm({ currentUser }: Props) {
     direccion: '',
     telefono: '',
     email: '',
+    imagen: undefined,
     idTipoDocumentoIdentificacion: 0,
     documentoIdentificacion: '',
-    // imagen: null,
     fechaNacimiento: '',
     colegiado: '',
     idProfesion: undefined,
@@ -155,12 +149,14 @@ export function UserNewEditForm({ currentUser }: Props) {
     estado: 'activo',
   };
 
-  // Map currentUser.estado from number to string if needed
   const mappedCurrentUser = currentUser
     ? {
         ...currentUser,
         estado: currentUser.estado === 1 ? 'activo' : 'inactivo',
         idDepartamento: currentUser.municipio.idDepartamento,
+        imagen: currentUser.imagen
+          ? `http://localhost:3000/usuario/${currentUser.id}/imagen`
+          : undefined,
       }
     : undefined;
 
@@ -188,16 +184,32 @@ export function UserNewEditForm({ currentUser }: Props) {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
+      const { imagen, ...restData } = data;
+      let userId: number;
+
+      // Create or update user first
       if (currentUser) {
         await UsuarioService.updateUsuario(currentUser.id, {
-          ...data,
+          ...restData,
           estado: data.estado === 'activo' ? 1 : 0,
         });
+        userId = currentUser.id;
       } else {
-        await UsuarioService.createUsuario({
-          ...data,
+        const newUser = await UsuarioService.createUsuario({
+          ...restData,
           fechaNacimiento: data.fechaNacimiento.split('T')[0],
           estado: 1,
+        });
+        userId = newUser.id;
+      }
+
+      if (imagen && imagen instanceof File) {
+        const formData = new FormData();
+        formData.append('imagen', imagen);
+
+        await fetch(`http://localhost:3000/usuario/${userId}/imagen`, {
+          method: 'POST',
+          body: formData,
         });
       }
 
@@ -220,40 +232,43 @@ export function UserNewEditForm({ currentUser }: Props) {
   return (
     <Form methods={methods} onSubmit={onSubmit}>
       <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 4 }}>
-          <Card sx={{ pt: 10, pb: 5, px: 3 }}>
-            {currentUser && (
+        {currentUser && (
+          <Grid size={{ xs: 12, md: 4 }}>
+            <Card sx={{ pt: 10, pb: 5, px: 3 }}>
               <Label
                 color={(values.estado === 'activo' && 'success') || 'error'}
                 sx={{ position: 'absolute', top: 24, right: 24 }}
               >
                 {values.estado}
               </Label>
-            )}
 
-            <Box sx={{ mb: 5 }}>
-              <Field.UploadAvatar
-                name="imagen"
-                maxSize={3145728}
-                helperText={
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      mt: 3,
-                      mx: 'auto',
-                      display: 'block',
-                      textAlign: 'center',
-                      color: 'text.disabled',
-                    }}
-                  >
-                    Permitidos *.jpeg, *.jpg, *.png, *.gif
-                    <br /> tamaño máximo de {fData(3145728)}
-                  </Typography>
-                }
-              />
-            </Box>
+              <Box sx={{ mb: 5 }}>
+                <Field.UploadAvatar
+                  name="imagen"
+                  maxSize={3145728}
+                  // value={
+                  //   currentUser?.imagen
+                  //     ? `http://localhost:3000/usuario/${currentUser.id}/imagen`
+                  //     : null
+                  // }
+                  helperText={
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        mt: 3,
+                        mx: 'auto',
+                        display: 'block',
+                        textAlign: 'center',
+                        color: 'text.disabled',
+                      }}
+                    >
+                      Permitidos *.jpeg, *.jpg, *.png, *.gif
+                      <br /> tamaño máximo de {fData(3145728)}
+                    </Typography>
+                  }
+                />
+              </Box>
 
-            {currentUser && (
               <FormControlLabel
                 labelPlacement="start"
                 control={
@@ -288,19 +303,17 @@ export function UserNewEditForm({ currentUser }: Props) {
                   justifyContent: 'space-between',
                 }}
               />
-            )}
 
-            {currentUser && (
               <Stack sx={{ mt: 3, alignItems: 'center', justifyContent: 'center' }}>
                 <Button variant="soft" color="error">
                   Eliminar usuario
                 </Button>
               </Stack>
-            )}
-          </Card>
-        </Grid>
+            </Card>
+          </Grid>
+        )}
 
-        <Grid size={{ xs: 12, md: 8 }}>
+        <Grid size={{ xs: 12, md: currentUser ? 8 : 12 }}>
           <Card sx={{ p: 3 }}>
             <Box
               sx={{
