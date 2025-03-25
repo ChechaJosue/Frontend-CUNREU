@@ -102,9 +102,8 @@ export interface IUsuario {
 }
 
 export interface IUsuarioTableFilters {
-  nombres: string;
-  apellidos: string;
-  rol: string[];
+  nombresApellidos: string;
+  correo: string;
   estado: string;
 }
 

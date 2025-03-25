@@ -280,7 +280,7 @@ export function ProductListView() {
             slots={{
               toolbar: CustomToolbarCallback,
               noRowsOverlay: () => <EmptyContent />,
-              noResultsOverlay: () => <EmptyContent title="No results found" />,
+              noResultsOverlay: () => <EmptyContent title="No se encontraron resultados" />,
             }}
             slotProps={{
               toolbar: { setFilterButtonEl },

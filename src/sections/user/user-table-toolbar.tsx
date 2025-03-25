@@ -26,7 +26,10 @@ type Props = {
   onResetPage: () => void;
   filters: UseSetStateReturn<IUsuarioTableFilters>;
   options: {
-    roles: string[];
+    estados: {
+      value: string;
+      label: string;
+    }[];
   };
 };
 
@@ -35,21 +38,29 @@ export function UserTableToolbar({ filters, options, onResetPage }: Props) {
 
   const { state: currentFilters, setState: updateFilters } = filters;
 
-  const handleFilterName = useCallback(
+  const handleFilterNombresApellidos = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       onResetPage();
-      updateFilters({ nombres: event.target.value });
+      updateFilters({ nombresApellidos: event.target.value });
     },
     [onResetPage, updateFilters]
   );
 
-  const handleFilterRole = useCallback(
+  const handleFilterCorreo = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onResetPage();
+      updateFilters({ correo: event.target.value });
+    },
+    [onResetPage, updateFilters]
+  );
+
+  const handleFilterEstado = useCallback(
     (event: SelectChangeEvent<string[]>) => {
       const newValue =
         typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value;
 
       onResetPage();
-      updateFilters({ rol: newValue });
+      updateFilters({ estado: newValue });
     },
     [onResetPage, updateFilters]
   );
@@ -64,17 +75,17 @@ export function UserTableToolbar({ filters, options, onResetPage }: Props) {
       <MenuList>
         <MenuItem onClick={() => menuActions.onClose()}>
           <Iconify icon="solar:printer-minimalistic-bold" />
-          Print
+          Imprimir
         </MenuItem>
 
         <MenuItem onClick={() => menuActions.onClose()}>
           <Iconify icon="solar:import-bold" />
-          Import
+          Importar
         </MenuItem>
 
         <MenuItem onClick={() => menuActions.onClose()}>
           <Iconify icon="solar:export-bold" />
-          Export
+          Exportar
         </MenuItem>
       </MenuList>
     </CustomPopover>
@@ -93,24 +104,30 @@ export function UserTableToolbar({ filters, options, onResetPage }: Props) {
         }}
       >
         <FormControl sx={{ flexShrink: 0, width: { xs: 1, md: 200 } }}>
-          <InputLabel htmlFor="filter-role-select">Rol</InputLabel>
+          <InputLabel htmlFor="filter-role-select">Estado</InputLabel>
           <Select
             multiple
-            value={currentFilters.rol}
-            onChange={handleFilterRole}
-            input={<OutlinedInput label="Rol" />}
-            renderValue={(selected) => selected.map((value) => value).join(', ')}
+            value={currentFilters.estado}
+            onChange={handleFilterEstado}
+            input={<OutlinedInput label="Estado" />}
+            renderValue={(selected) =>
+              selected
+                .map(
+                  (value) => options.estados.find((item) => item.value === value)?.label ?? value
+                )
+                .join(', ')
+            }
             inputProps={{ id: 'filter-role-select' }}
             MenuProps={{ PaperProps: { sx: { maxHeight: 240 } } }}
           >
-            {options.roles.map((option) => (
-              <MenuItem key={option} value={option}>
+            {options.estados.map(({ label, value }) => (
+              <MenuItem key={value} value={value}>
                 <Checkbox
                   disableRipple
                   size="small"
-                  checked={currentFilters.rol.includes(option)}
+                  checked={currentFilters.estado.includes(value)}
                 />
-                {option}
+                {label}
               </MenuItem>
             ))}
           </Select>
@@ -127,9 +144,9 @@ export function UserTableToolbar({ filters, options, onResetPage }: Props) {
         >
           <TextField
             fullWidth
-            value={currentFilters.nombres}
-            onChange={handleFilterName}
-            placeholder="Buscar..."
+            value={currentFilters.nombresApellidos}
+            onChange={handleFilterNombresApellidos}
+            placeholder="Buscar por nombre..."
             slotProps={{
               input: {
                 startAdornment: (
@@ -141,6 +158,21 @@ export function UserTableToolbar({ filters, options, onResetPage }: Props) {
             }}
           />
 
+          <TextField
+            fullWidth
+            value={currentFilters.correo}
+            onChange={handleFilterCorreo}
+            placeholder="Buscar por correo"
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Iconify icon="eva:email-fill" sx={{ color: 'text.disabled' }} />
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
           <IconButton onClick={menuActions.onOpen}>
             <Iconify icon="eva:more-vertical-fill" />
           </IconButton>

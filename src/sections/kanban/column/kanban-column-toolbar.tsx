@@ -91,7 +91,7 @@ export function KanbanColumnToolBar({
           }}
         >
           <Iconify icon="solar:eraser-bold" />
-          Clear
+          Limpiar
         </MenuItem>
 
         <MenuItem

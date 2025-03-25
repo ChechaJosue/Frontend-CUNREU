@@ -8,8 +8,6 @@ import Chip from '@mui/material/Chip';
 
 import { chipProps, FiltersBlock, FiltersResult } from 'src/components/filters-result';
 
-// ----------------------------------------------------------------------
-
 type Props = FiltersResultProps & {
   onResetPage: () => void;
   filters: UseSetStateReturn<IUsuarioTableFilters>;
@@ -18,24 +16,23 @@ type Props = FiltersResultProps & {
 export function UserTableFiltersResult({ filters, onResetPage, totalResults, sx }: Props) {
   const { state: currentFilters, setState: updateFilters, resetState: resetFilters } = filters;
 
-  const handleRemoveKeyword = useCallback(() => {
+  const handleRemoveNombresApellidos = useCallback(() => {
     onResetPage();
-    updateFilters({ nombres: '' });
+    updateFilters({ nombresApellidos: '' });
   }, [onResetPage, updateFilters]);
 
-  const handleRemoveStatus = useCallback(() => {
+  const handleRemoveCorreo = useCallback(() => {
     onResetPage();
-    updateFilters({ estado: 'all' });
+    updateFilters({ correo: '' });
   }, [onResetPage, updateFilters]);
 
-  const handleRemoveRole = useCallback(
+  const handleRemoveEstado = useCallback(
     (inputValue: string) => {
-      const newValue = currentFilters.rol.filter((item) => item !== inputValue);
-
+      const newValue = currentFilters.estado.filter((item) => item !== inputValue);
       onResetPage();
-      updateFilters({ rol: newValue });
+      updateFilters({ estado: newValue });
     },
-    [onResetPage, updateFilters, currentFilters.rol]
+    [onResetPage, updateFilters, currentFilters.estado]
   );
 
   const handleReset = useCallback(() => {
@@ -45,23 +42,28 @@ export function UserTableFiltersResult({ filters, onResetPage, totalResults, sx 
 
   return (
     <FiltersResult totalResults={totalResults} onReset={handleReset} sx={sx}>
-      <FiltersBlock label="Status:" isShow={currentFilters.estado !== 'all'}>
-        <Chip
-          {...chipProps}
-          label={currentFilters.estado}
-          onDelete={handleRemoveStatus}
-          sx={{ textTransform: 'capitalize' }}
-        />
-      </FiltersBlock>
-
-      <FiltersBlock label="Role:" isShow={!!currentFilters.rol.length}>
-        {currentFilters.rol.map((item) => (
-          <Chip {...chipProps} key={item} label={item} onDelete={() => handleRemoveRole(item)} />
+      <FiltersBlock label="Estado:" isShow={!!currentFilters.estado.length}>
+        {currentFilters.estado.map((item) => (
+          <Chip
+            {...chipProps}
+            key={item}
+            label={item}
+            onDelete={() => handleRemoveEstado(item)}
+            sx={{ textTransform: 'capitalize' }}
+          />
         ))}
       </FiltersBlock>
 
-      <FiltersBlock label="Keyword:" isShow={!!currentFilters.nombres}>
-        <Chip {...chipProps} label={currentFilters.nombres} onDelete={handleRemoveKeyword} />
+      <FiltersBlock label="Búsqueda:" isShow={!!currentFilters.nombresApellidos}>
+        <Chip
+          {...chipProps}
+          label={currentFilters.nombresApellidos}
+          onDelete={handleRemoveNombresApellidos}
+        />
+      </FiltersBlock>
+
+      <FiltersBlock label="Correo:" isShow={!!currentFilters.correo}>
+        <Chip {...chipProps} label={currentFilters.correo} onDelete={handleRemoveCorreo} />
       </FiltersBlock>
     </FiltersResult>
   );

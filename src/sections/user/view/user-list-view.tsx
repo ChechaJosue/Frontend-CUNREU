@@ -23,7 +23,6 @@ import { UsuarioService } from 'src/api/services/usuario.service';
 import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
-import { ConfirmDialog } from 'src/components/custom-dialog';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 import {
   useTable,
@@ -37,12 +36,8 @@ import {
 } from 'src/components/table';
 
 import { UserTableRow } from '../user-table-row';
+import { UserTableToolbar } from '../user-table-toolbar';
 import { UserTableFiltersResult } from '../user-table-filters-result';
-
-// ----------------------------------------------------------------------
-
-// Traducción de opciones de estado
-// const STATUS_OPTIONS = [{ value: 'all', label: 'Todos' }, ...USUARIO_STATUS_OPTIONS];
 
 const TABLE_HEAD: TableHeadCellProps[] = [
   { id: 'id', label: 'ID' },
@@ -53,7 +48,10 @@ const TABLE_HEAD: TableHeadCellProps[] = [
   { id: '', width: 88 },
 ];
 
-// ----------------------------------------------------------------------
+const ESTADO_OPTIONS = [
+  { value: 'activo', label: 'Activo' },
+  { value: 'inactivo', label: 'Inactivo' },
+];
 
 export function UserListView() {
   const table = useTable();
@@ -66,14 +64,12 @@ export function UserListView() {
   });
 
   const filters = useSetState<IUsuarioTableFilters>({
-    nombres: '',
-    apellidos: '',
-    rol: [],
-    estado: 'all',
+    nombresApellidos: '',
+    correo: '',
+    estado: ['activo'],
   });
   const { state: currentFilters, setState: updateFilters } = filters;
 
-  // Fetch users from API
   const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
@@ -106,8 +102,7 @@ export function UserListView() {
     filters: currentFilters,
   });
 
-  const canReset =
-    !!currentFilters.nombres || currentFilters.rol.length > 0 || currentFilters.estado !== 'all';
+  const canReset = !!currentFilters.nombresApellidos || currentFilters.estado.length > 0;
 
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
@@ -125,168 +120,122 @@ export function UserListView() {
     [fetchUsers]
   );
 
-  const handleDeleteRows = useCallback(async () => {
-    try {
-      // Process deletions sequentially
-      for (const id of table.selected) {
-        await UsuarioService.deleteUsuario(id);
-      }
-
-      toast.success('¡Usuarios desactivados con éxito!');
-      table.onSelectAllRows(false, []); // Clear selection
-      fetchUsers(); // Refresh the list
-    } catch (error) {
-      console.error('Error deleting users:', error);
-      toast.error('Error al desactivar los usuarios');
-    }
-  }, [table, fetchUsers]);
-
-  const handleFilterStatus = useCallback(
-    (event: React.SyntheticEvent, newValue: string) => {
-      table.onResetPage();
-      updateFilters({ estado: newValue });
-    },
-    [updateFilters, table]
-  );
-
-  const renderConfirmDialog = () => (
-    <ConfirmDialog
-      open={confirmDialog.value}
-      onClose={confirmDialog.onFalse}
-      title="Desactivar"
-      content={
-        <>
-          ¿Está seguro que desea desactivar <strong> {table.selected.length} </strong> usuarios?
-        </>
-      }
-      action={
-        <Button
-          variant="contained"
-          color="error"
-          onClick={() => {
-            handleDeleteRows();
-            confirmDialog.onFalse();
-          }}
-        >
-          Desactivar
-        </Button>
-      }
-    />
-  );
-
   return (
-    <>
-      <DashboardContent>
-        <CustomBreadcrumbs
-          heading="Lista de Usuarios"
-          links={[
-            { name: 'Dashboard', href: paths.dashboard.root },
-            { name: 'Usuarios', href: paths.dashboard.user.list },
-            { name: 'Lista' },
-          ]}
-          action={
-            <Button
-              component={RouterLink}
-              href={paths.dashboard.user.new}
-              variant="contained"
-              startIcon={<Iconify icon="mingcute:add-line" />}
-            >
-              Crear usuario
-            </Button>
-          }
-          sx={{ mb: { xs: 3, md: 5 } }}
+    <DashboardContent>
+      <CustomBreadcrumbs
+        heading="Lista de Usuarios"
+        links={[
+          { name: 'Dashboard', href: paths.dashboard.root },
+          { name: 'Usuarios', href: paths.dashboard.user.list },
+          { name: 'Lista' },
+        ]}
+        action={
+          <Button
+            component={RouterLink}
+            href={paths.dashboard.user.new}
+            variant="contained"
+            startIcon={<Iconify icon="mingcute:add-line" />}
+          >
+            Crear usuario
+          </Button>
+        }
+        sx={{ mb: { xs: 3, md: 5 } }}
+      />
+
+      <Card>
+        <UserTableToolbar
+          filters={filters}
+          options={{
+            estados: ESTADO_OPTIONS,
+          }}
+          onResetPage={table.onResetPage}
         />
+        {canReset && (
+          <UserTableFiltersResult
+            filters={filters}
+            totalResults={paginationData.total}
+            onResetPage={table.onResetPage}
+            sx={{ p: 2.5, pt: 0 }}
+          />
+        )}
 
-        <Card>
-          {canReset && (
-            <UserTableFiltersResult
-              filters={filters}
-              totalResults={paginationData.total}
-              onResetPage={table.onResetPage}
-              sx={{ p: 2.5, pt: 0 }}
-            />
-          )}
+        <Box sx={{ position: 'relative' }}>
+          <TableSelectedAction
+            dense={table.dense}
+            numSelected={table.selected.length}
+            rowCount={dataFiltered.length}
+            onSelectAllRows={(checked) =>
+              table.onSelectAllRows(
+                checked,
+                dataFiltered.map((row) => `${row.id}`)
+              )
+            }
+            action={
+              <Tooltip title="Desactivar">
+                <IconButton color="primary" onClick={confirmDialog.onTrue}>
+                  <Iconify icon="solar:trash-bin-trash-bold" />
+                </IconButton>
+              </Tooltip>
+            }
+          />
 
-          <Box sx={{ position: 'relative' }}>
-            <TableSelectedAction
-              dense={table.dense}
-              numSelected={table.selected.length}
-              rowCount={dataFiltered.length}
-              onSelectAllRows={(checked) =>
-                table.onSelectAllRows(
-                  checked,
-                  dataFiltered.map((row) => `${row.id}`)
-                )
-              }
-              action={
-                <Tooltip title="Desactivar">
-                  <IconButton color="primary" onClick={confirmDialog.onTrue}>
-                    <Iconify icon="solar:trash-bin-trash-bold" />
-                  </IconButton>
-                </Tooltip>
-              }
-            />
+          <Scrollbar>
+            {loading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', my: 5 }}>
+                <CircularProgress />
+              </Box>
+            ) : (
+              <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
+                <TableHeadCustom
+                  order={table.order}
+                  orderBy={table.orderBy}
+                  headCells={TABLE_HEAD}
+                  rowCount={dataFiltered.length}
+                  onSort={table.onSort}
+                />
 
-            <Scrollbar>
-              {loading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', my: 5 }}>
-                  <CircularProgress />
-                </Box>
-              ) : (
-                <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
-                  <TableHeadCustom
-                    order={table.order}
-                    orderBy={table.orderBy}
-                    headCells={TABLE_HEAD}
-                    rowCount={dataFiltered.length}
-                    onSort={table.onSort}
+                <TableBody>
+                  {dataFiltered
+                    .slice(
+                      table.page * table.rowsPerPage,
+                      table.page * table.rowsPerPage + table.rowsPerPage
+                    )
+                    .map((row) => (
+                      <UserTableRow
+                        key={row.id}
+                        row={row}
+                        selected={table.selected.includes(String(row.id))}
+                        onSelectRow={() => table.onSelectRow(String(row.id))}
+                        onDeleteRow={() => handleDeleteRow(row.id)}
+                        editHref={paths.dashboard.user.edit(String(row.id))}
+                      />
+                    ))}
+
+                  <TableEmptyRows
+                    height={table.dense ? 56 : 56 + 20}
+                    emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
                   />
 
-                  <TableBody>
-                    {dataFiltered
-                      .slice(
-                        table.page * table.rowsPerPage,
-                        table.page * table.rowsPerPage + table.rowsPerPage
-                      )
-                      .map((row) => (
-                        <UserTableRow
-                          key={row.id}
-                          row={row}
-                          selected={table.selected.includes(String(row.id))}
-                          onSelectRow={() => table.onSelectRow(String(row.id))}
-                          onDeleteRow={() => handleDeleteRow(row.id)}
-                          editHref={paths.dashboard.user.edit(String(row.id))}
-                        />
-                      ))}
+                  <TableNoData notFound={notFound} />
+                </TableBody>
+              </Table>
+            )}
+          </Scrollbar>
+        </Box>
 
-                    <TableEmptyRows
-                      height={table.dense ? 56 : 56 + 20}
-                      emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
-                    />
-
-                    <TableNoData notFound={notFound} />
-                  </TableBody>
-                </Table>
-              )}
-            </Scrollbar>
-          </Box>
-
-          <TablePaginationCustom
-            page={table.page}
-            dense={table.dense}
-            count={paginationData.total}
-            rowsPerPage={table.rowsPerPage}
-            onPageChange={table.onChangePage}
-            onChangeDense={table.onChangeDense}
-            onRowsPerPageChange={table.onChangeRowsPerPage}
-            labelRowsPerPage="Filas por página:"
-            labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
-          />
-        </Card>
-      </DashboardContent>
-
-      {renderConfirmDialog()}
-    </>
+        <TablePaginationCustom
+          page={table.page}
+          dense={table.dense}
+          count={paginationData.total}
+          rowsPerPage={table.rowsPerPage}
+          onPageChange={table.onChangePage}
+          onChangeDense={table.onChangeDense}
+          onRowsPerPageChange={table.onChangeRowsPerPage}
+          labelRowsPerPage="Filas por página:"
+          labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+        />
+      </Card>
+    </DashboardContent>
   );
 }
 
@@ -299,7 +248,7 @@ type ApplyFilterProps = {
 };
 
 // Since filtering is now handled by the API, this function is simplified
-function applyFilter({ inputData, comparator }: ApplyFilterProps) {
+function applyFilter({ inputData, comparator, filters }: ApplyFilterProps) {
   const stabilizedThis = inputData.map((el, index) => [el, index] as const);
 
   stabilizedThis.sort((a, b) => {
@@ -308,5 +257,29 @@ function applyFilter({ inputData, comparator }: ApplyFilterProps) {
     return a[1] - b[1];
   });
 
-  return stabilizedThis.map((el) => el[0]);
+  inputData = stabilizedThis.map((el) => el[0]);
+
+  // Apply filters
+  if (filters.nombresApellidos) {
+    const searchTerm = filters.nombresApellidos.toLowerCase();
+    inputData = inputData.filter(
+      (user) =>
+        user.nombres.toLowerCase().includes(searchTerm) ||
+        user.apellidos.toLowerCase().includes(searchTerm)
+    );
+  }
+
+  if (filters.correo) {
+    const searchTerm = filters.correo.toLowerCase();
+    inputData = inputData.filter((user) => user.email.toLowerCase().includes(searchTerm));
+  }
+
+  if (filters.estado.length) {
+    inputData = inputData.filter((user) => {
+      const userEstado = user.estado === 1 ? 'activo' : 'inactivo';
+      return filters.estado.includes(userEstado);
+    });
+  }
+
+  return inputData;
 }
