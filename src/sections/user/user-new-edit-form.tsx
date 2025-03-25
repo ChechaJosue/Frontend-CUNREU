@@ -214,9 +214,7 @@ export function UserNewEditForm({ currentUser }: Props) {
       }
 
       toast.success(
-        currentUser
-          ? `Usuario ${data.nombres} actualizado correctamente`
-          : `Usuario ${data.nombres} creado correctamente`
+        `Usuario ${data.nombres} ${currentUser ? 'actualizado' : 'creado'} correctamente`
       );
       router.push(paths.dashboard.user.list);
     } catch (error) {
