@@ -1,3 +1,8 @@
+import { z as zod } from 'zod';
+import { isValidPhoneNumber } from 'react-phone-number-input/input';
+
+import { schemaHelper } from 'src/components/hook-form';
+
 import type { IDateValue, ISocialLink } from './common';
 
 // ----------------------------------------------------------------------
@@ -104,7 +109,7 @@ export interface IUsuario {
 export interface IUsuarioTableFilters {
   nombresApellidos: string;
   correo: string;
-  estado: string;
+  estado: string[];
 }
 
 export type IUserItem = {
@@ -130,3 +135,45 @@ export type IUserAccountBillingHistory = {
   invoiceNumber: string;
   createdAt: IDateValue;
 };
+
+export const NewUserSchema = zod.object({
+  nombres: zod.string().min(1, { message: '¡Los nombres son requeridos!' }),
+  apellidos: zod.string().min(1, { message: '¡Los apellidos son requeridos!' }),
+  direccion: zod.string().optional(),
+  telefono: schemaHelper.phoneNumber({
+    isValid: isValidPhoneNumber,
+  }),
+  email: zod
+    .string()
+    .min(1, { message: '¡Email es requerido!' })
+    .email({ message: '¡Email debe ser una dirección válida!' }),
+  idTipoDocumentoIdentificacion: zod.number(),
+  documentoIdentificacion: zod
+    .number()
+    .min(1, { message: '¡Documento de identificación es requerido!' })
+    .transform((val) => val.toString())
+    .or(zod.string().min(1, { message: '¡Documento de identificación es requerido!' })),
+  imagen: zod.union([zod.string(), zod.instanceof(File)]).optional(),
+  fechaNacimiento: zod.string().min(1, { message: '¡Fecha de nacimiento es requerida!' }),
+  colegiado: zod
+    .number()
+    .optional()
+    .transform((val) => (val ? val.toString() : undefined))
+    .or(
+      zod
+        .string()
+        .optional()
+        .transform((val) => {
+          if (!val) return undefined;
+          const num = Number(val);
+          return isNaN(num) ? undefined : val;
+        })
+    ),
+  idProfesion: zod.number().optional(),
+  idRol: zod.number(),
+  idDepartamento: zod.number().min(1, { message: '¡Departamento es requerido!' }),
+  idMunicipio: zod.number().min(1, { message: '¡Municipio es requerido!' }),
+  estado: zod.enum(['activo', 'inactivo']).optional(),
+});
+
+export type NewUserSchemaType = zod.infer<typeof NewUserSchema>;

@@ -9,13 +9,14 @@ import { layoutClasses } from '../core/classes';
 
 // ----------------------------------------------------------------------
 
-export type AuthSplitContentProps = BoxProps & { layoutQuery?: Breakpoint };
+export type AuthSplitContentProps = BoxProps & { layoutQuery?: Breakpoint; isLogin?: boolean };
 
 export function AuthSplitContent({
   sx,
   children,
   className,
   layoutQuery = 'md',
+  isLogin = false,
   ...other
 }: AuthSplitContentProps) {
   return (
@@ -39,10 +40,12 @@ export function AuthSplitContent({
     >
       <Box
         sx={{
-          width: 1,
+          width: '100%',
           display: 'flex',
           flexDirection: 'column',
-          maxWidth: 'var(--layout-auth-content-width)',
+          maxWidth: isLogin ? '500px' : '800px',
+          // padding: '2em',
+          // maxWidth: 'var(--layout-auth-content-width)',
         }}
       >
         {children}

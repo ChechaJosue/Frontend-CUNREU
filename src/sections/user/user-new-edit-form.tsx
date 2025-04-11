@@ -1,12 +1,21 @@
-import { z as zod } from 'zod';
+import type { NewUserSchemaType } from 'src/types/user';
+import type {
+  IRolAPI,
+  IUsuarioAPI,
+  IProfesionAPI,
+  IDepartamentoAPI,
+  ITipoDocumentoAPI,
+} from 'src/api';
+
+import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { isValidPhoneNumber } from 'react-phone-number-input/input';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid2';
 import Stack from '@mui/material/Stack';
+import { MenuItem } from '@mui/material';
 import Button from '@mui/material/Button';
 import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
@@ -18,64 +27,6 @@ import { useRouter } from 'src/routes/hooks';
 
 import { fData } from 'src/utils/format-number';
 
-import { Label } from 'src/components/label';
-import { toast } from 'src/components/snackbar';
-import { Form, Field, schemaHelper } from 'src/components/hook-form';
-
-export type NewUserSchemaType = zod.infer<typeof NewUserSchema>;
-
-export const NewUserSchema = zod.object({
-  nombres: zod.string().min(1, { message: '¡Los nombres son requeridos!' }),
-  apellidos: zod.string().min(1, { message: '¡Los apellidos son requeridos!' }),
-  direccion: zod.string().optional(),
-  telefono: schemaHelper.phoneNumber({
-    isValid: isValidPhoneNumber,
-  }),
-  email: zod
-    .string()
-    .min(1, { message: '¡Email es requerido!' })
-    .email({ message: '¡Email debe ser una dirección válida!' }),
-  idTipoDocumentoIdentificacion: zod.number(),
-  documentoIdentificacion: zod
-    .number()
-    .min(1, { message: '¡Documento de identificación es requerido!' })
-    .transform((val) => val.toString())
-    .or(zod.string().min(1, { message: '¡Documento de identificación es requerido!' })),
-  imagen: zod.union([zod.string(), zod.instanceof(File)]).optional(),
-  fechaNacimiento: zod.string().min(1, { message: '¡Fecha de nacimiento es requerida!' }),
-  colegiado: zod
-    .number()
-    .optional()
-    .transform((val) => (val ? val.toString() : undefined))
-    .or(
-      zod
-        .string()
-        .optional()
-        .transform((val) => {
-          if (!val) return undefined;
-          const num = Number(val);
-          return isNaN(num) ? undefined : val;
-        })
-    ),
-  idProfesion: zod.number().optional(),
-  idRol: zod.number(),
-  idDepartamento: zod.number().min(1, { message: '¡Departamento es requerido!' }),
-  idMunicipio: zod.number().min(1, { message: '¡Municipio es requerido!' }),
-  estado: zod.enum(['activo', 'inactivo']).optional(),
-});
-
-import type {
-  IRolAPI,
-  IUsuarioAPI,
-  IProfesionAPI,
-  IDepartamentoAPI,
-  ITipoDocumentoAPI,
-} from 'src/api';
-
-import { useState, useEffect } from 'react';
-
-import { MenuItem } from '@mui/material';
-
 import {
   RolService,
   UsuarioService,
@@ -84,7 +35,12 @@ import {
   TipoDocumentoService,
 } from 'src/api';
 
+import { Label } from 'src/components/label';
+import { toast } from 'src/components/snackbar';
+import { Form, Field } from 'src/components/hook-form';
 import { LoadingScreen } from 'src/components/loading-screen';
+
+import { NewUserSchema } from 'src/types/user';
 
 type Props = {
   currentUser?: IUsuarioAPI;

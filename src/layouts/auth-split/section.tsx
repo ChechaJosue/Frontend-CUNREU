@@ -4,11 +4,7 @@ import type { Breakpoint } from '@mui/material/styles';
 import { varAlpha } from 'minimal-shared/utils';
 
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
-import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
-
-import { RouterLink } from 'src/routes/components';
 
 import { CONFIG } from 'src/global-config';
 
@@ -32,9 +28,9 @@ export function AuthSplitSection({
   method,
   methods,
   layoutQuery = 'md',
-  title = 'Manage the job',
+  title = 'CUNREU',
   imgUrl = `${CONFIG.assetsDir}/assets/illustrations/illustration-dashboard.webp`,
-  subtitle = 'More effectively with optimized workflows.',
+  subtitle = 'Centro Universitario de la Retalhuleu',
   ...other
 }: AuthSplitSectionProps) {
   return (
@@ -85,7 +81,7 @@ export function AuthSplitSection({
         sx={{ width: 1, aspectRatio: '4/3', objectFit: 'cover' }}
       />
 
-      {!!methods?.length && method && (
+      {/* {!!methods?.length && method && (
         <Box component="ul" sx={{ gap: 2, display: 'flex' }}>
           {methods.map((option) => {
             const selected = method === option.label.toLowerCase();
@@ -119,7 +115,7 @@ export function AuthSplitSection({
             );
           })}
         </Box>
-      )}
+      )} */}
     </Box>
   );
 }

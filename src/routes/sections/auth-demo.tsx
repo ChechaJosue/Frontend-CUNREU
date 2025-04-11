@@ -29,7 +29,7 @@ const authSplit = {
       element: (
         <AuthSplitLayout
           slotProps={{
-            section: { title: 'Hi, Welcome back' },
+            section: { title: 'CUNREU' },
           }}
         >
           <SplitLayout.SignInPage />

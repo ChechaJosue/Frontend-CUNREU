@@ -3,8 +3,6 @@ import type { BoxProps } from '@mui/material/Box';
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 
-// ----------------------------------------------------------------------
-
 export function SignUpTerms({ sx, ...other }: BoxProps) {
   return (
     <Box
@@ -21,13 +19,13 @@ export function SignUpTerms({ sx, ...other }: BoxProps) {
       ]}
       {...other}
     >
-      {'By signing up, I agree to '}
+      {'Cuando te registras, aceptas nuestros '}
       <Link underline="always" color="text.primary">
-        Terms of service
+        Terminos de servicio
       </Link>
-      {' and '}
+      {' y '}
       <Link underline="always" color="text.primary">
-        Privacy policy
+        Politica de privacidad
       </Link>
       .
     </Box>

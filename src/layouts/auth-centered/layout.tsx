@@ -130,7 +130,7 @@ export function AuthCenteredLayout({
       /** **************************************
        * @Styles
        *************************************** */
-      cssVars={{ '--layout-auth-content-width': '420px', ...cssVars }}
+      cssVars={{ '--layout-auth-content-width': '480px', ...cssVars }}
       sx={[
         (theme) => ({
           position: 'relative',
